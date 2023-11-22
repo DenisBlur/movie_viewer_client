@@ -40,7 +40,7 @@ class YoutubeWidget extends StatelessWidget {
                         VideoPreview(
                           yp: yp,
                         ),
-                      if (yp.title != "") Padding(padding: EdgeInsets.only(left: 8), child: Text("Качество видео"),),
+                      if (yp.title != "") const Padding(padding: EdgeInsets.only(left: 8), child: Text("Качество видео"),),
                       for (var info in yp.currentVideoQualityData) TextButton(onPressed: () {
                         Navigator.of(context).pop();
                         yp.sendCurrentMovie(info);

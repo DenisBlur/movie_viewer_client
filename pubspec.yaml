@@ -12,9 +12,6 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
   socket_io_client: ^2.0.3+1
-  media_kit: ^1.1.10+1
-  media_kit_video: ^1.2.4
-  media_kit_libs_video: ^1.0.4
   provider: ^6.1.1
   window_manager: ^0.3.7
   html: ^0.15.4
@@ -23,6 +20,8 @@ dependencies:
   shared_preferences: ^2.2.1
   transparent_image: ^2.0.0
   youtube_explode_dart: ^2.0.2
+  fvp: ^0.11.0
+  video_player: ^2.8.1
 
 dev_dependencies:
   flutter_test:

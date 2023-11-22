@@ -1,9 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:movie_viewer/model/socket_provider.dart';
+import 'package:movie_viewer/model/socket/socket_provider.dart';
 import 'package:movie_viewer/model/ux_provider.dart';
-import 'package:movie_viewer/widgets/user_item.dart';
+import 'package:movie_viewer/widgets/items/user_item.dart';
 import 'package:provider/provider.dart';
 
 class UserMenu extends StatelessWidget {

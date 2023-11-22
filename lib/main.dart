@@ -1,20 +1,23 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
-import 'package:media_kit/media_kit.dart';
+import 'package:fvp/fvp.dart';
 import 'package:movie_viewer/model/hq_movie_provider.dart';
 import 'package:movie_viewer/model/movie_provider.dart';
 import 'package:movie_viewer/model/sites/youtube_provider.dart';
 import 'package:movie_viewer/model/ux_provider.dart';
-import 'package:movie_viewer/screens/welcome_page.dart';
+import 'package:movie_viewer/screens/main_screen.dart';
+import 'package:movie_viewer/screens/test_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'model/socket_provider.dart';
+import 'model/socket/socket_provider.dart';
 
-final _defaultLightColorScheme = ColorScheme.fromSwatch(primarySwatch: Colors.blue);
+final _defaultLightColorScheme =
+    ColorScheme.fromSwatch(primarySwatch: Colors.blue);
 
-final _defaultDarkColorScheme = ColorScheme.fromSwatch(primarySwatch: Colors.blue, brightness: Brightness.dark);
+final _defaultDarkColorScheme = ColorScheme.fromSwatch(
+    primarySwatch: Colors.blue, brightness: Brightness.dark);
 
 List<SingleChildWidget> _providers = [
   ChangeNotifierProvider(
@@ -37,8 +40,10 @@ List<SingleChildWidget> _providers = [
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
-  MediaKit.ensureInitialized();
-
+  registerWith(options: {
+    'video.decoders': ['D3D11', 'NVDEC', 'FFmpeg'],
+    'lowLatency': 1,
+  });
   runApp(const MyApp());
 }
 
@@ -64,7 +69,7 @@ class MyApp extends StatelessWidget {
                 useMaterial3: true,
                 platform: TargetPlatform.iOS,
               ),
-              home: const WelcomePage(),
+              home: const MainScreen(),
             );
           },
         );

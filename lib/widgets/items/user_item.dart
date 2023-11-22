@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../data/common.dart';
+import '../../data/common.dart';
 
 class UserItem extends StatelessWidget {
   const UserItem({super.key, required this.user});

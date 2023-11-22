@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:movie_viewer/data/common.dart';
-import 'package:movie_viewer/model/socket_provider.dart';
+import 'package:movie_viewer/model/socket/socket_provider.dart';
 import 'package:provider/provider.dart';
 
 class SessionItem extends StatelessWidget {
@@ -32,6 +32,8 @@ class SessionItem extends StatelessWidget {
           Text(session.sessionName!, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),),
           const Expanded(child: SizedBox()),
           Text("${session.connectedUsers!.length.toString()}/${session.maxUsers!.toString()}"),
+          if(session.currentMovie != null)
+          Text("${session.currentMovie!.title}"),
           const SizedBox(width: 16,),
           if(canConnect) FilledButton(
             onPressed:() {

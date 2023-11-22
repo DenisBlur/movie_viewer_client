@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
-import 'package:movie_viewer/model/socket_provider.dart';
+import 'package:movie_viewer/model/socket/socket_provider.dart';
 import '../data/common.dart';
 
 class HQMovieProvider extends ChangeNotifier {

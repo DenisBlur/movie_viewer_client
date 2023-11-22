@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:movie_viewer/model/sites/youtube_provider.dart';
-import 'package:movie_viewer/model/socket_provider.dart';
-import 'package:movie_viewer/widgets/movies_widget.dart';
+import 'package:movie_viewer/model/socket/socket_provider.dart';
 import 'package:movie_viewer/widgets/youtube_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -76,7 +74,7 @@ Future<void> findMovie(BuildContext context) async {
               ),
             ],
           ),
-          content: HQSelectWidget(),
+          content: const BaseMovieFinder(),
           actions: <Widget>[
             TextButton(
               child: const Text('Отмена'),

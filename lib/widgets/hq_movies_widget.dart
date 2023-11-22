@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:movie_viewer/model/hq_movie_provider.dart';
 import 'package:movie_viewer/model/movie_provider.dart';
+import 'package:movie_viewer/widgets/items/movie_item.dart';
 import 'package:provider/provider.dart';
 
 import '../data/common.dart';
-import 'movies_widget.dart';
 
 double movieCardW = 170 * 1.25;
 double movieCardH = 245 * 1.25;
 
-class HQSelectWidget extends StatefulWidget {
-  const HQSelectWidget({super.key});
+class BaseMovieFinder extends StatefulWidget {
+  const BaseMovieFinder({super.key});
 
   @override
-  State<HQSelectWidget> createState() => _HQSelectWidgetState();
+  State<BaseMovieFinder> createState() => _BaseMovieFinderState();
 }
 
-class _HQSelectWidgetState extends State<HQSelectWidget> {
+class _BaseMovieFinderState extends State<BaseMovieFinder> {
   bool startup = true;
 
   @override
@@ -26,7 +26,7 @@ class _HQSelectWidgetState extends State<HQSelectWidget> {
   }
 
   loadContent() async {
-    HQMovieProvider mp = context.read();
+    MovieProvider mp = context.read();
     if (startup) {
       await mp.getMoviesPage(1, false);
       await mp.getMoviesPage(2, true);
@@ -39,7 +39,7 @@ class _HQSelectWidgetState extends State<HQSelectWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<HQMovieProvider>(
+    return Consumer<MovieProvider>(
       builder: (context, mp, child) {
         return SizedBox(
           width: MediaQuery.of(context).size.width / 2,
@@ -59,7 +59,7 @@ class _HQSelectWidgetState extends State<HQSelectWidget> {
                               return MovieItem(
                                 movie: movie,
                                 callback: () {
-                                  mp.setMovie(movie);
+                                  mp.getMovieStreamLink(movie);
                                   Navigator.pop(context);
                                 },
                               );

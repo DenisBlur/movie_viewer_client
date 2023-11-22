@@ -1,8 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:media_kit/media_kit.dart';
 import 'package:movie_viewer/data/common.dart';
-import 'package:movie_viewer/model/socket_provider.dart';
-import 'package:win32/win32.dart';
+import 'package:movie_viewer/model/socket/socket_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class YoutubeProvider extends ChangeNotifier {
