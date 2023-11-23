@@ -39,7 +39,6 @@ class TabMovieViewer extends StatelessWidget {
                         ),
                       ),
                     ),
-                  if (sp.checkLeader()) AdminPanel(pr: sp),
                 ],
               ),
             ),

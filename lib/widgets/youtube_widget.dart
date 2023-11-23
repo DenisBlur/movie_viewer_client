@@ -36,6 +36,8 @@ class YoutubeWidget extends StatelessWidget {
                           ),
                         ),
                       ),
+                      if(yp.loading)
+                        const LinearProgressIndicator(),
                       if (yp.title != "")
                         VideoPreview(
                           yp: yp,

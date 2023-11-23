@@ -33,6 +33,7 @@ class _MovieItemState extends State<MovieItem> {
         height: movieCardH,
         child: Stack(
           children: [
+            if(widget.movie.coverUrl != null)
             ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(

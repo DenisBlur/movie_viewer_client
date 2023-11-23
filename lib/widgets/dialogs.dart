@@ -180,41 +180,44 @@ Future<void> createFilmDialog(BuildContext context) async {
                 width: 16,
               ),
               Text(
-                "Создание сессии",
+                "Добавить фильм",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
           ),
-          content: Column(
-            children: [
-              SizedBox(
-                width: 450,
-                child: TextField(
-                  controller: movieNameController,
-                  decoration: const InputDecoration(
-                    label: Text("Название фильма"),
+          content: SizedBox(
+            height: 192,
+            child: Column(
+              children: [
+                SizedBox(
+                  width: 450,
+                  child: TextField(
+                    controller: movieNameController,
+                    decoration: const InputDecoration(
+                      label: Text("Название фильма"),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(
-                width: 450,
-                child: TextField(
-                  controller: movieYearController,
-                  decoration: const InputDecoration(
-                    label: Text("Год выпуска"),
+                SizedBox(
+                  width: 450,
+                  child: TextField(
+                    controller: movieYearController,
+                    decoration: const InputDecoration(
+                      label: Text("Год выпуска"),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(
-                width: 450,
-                child: TextField(
-                  controller: movieLinkController,
-                  decoration: const InputDecoration(
-                    label: Text("ссылка на фильм"),
+                SizedBox(
+                  width: 450,
+                  child: TextField(
+                    controller: movieLinkController,
+                    decoration: const InputDecoration(
+                      label: Text("ссылка на фильм"),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           actions: <Widget>[
             TextButton(

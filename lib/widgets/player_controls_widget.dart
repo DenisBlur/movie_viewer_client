@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:movie_viewer/model/socket/socket_provider.dart';
 import 'package:movie_viewer/model/ux_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:window_manager/window_manager.dart';
 
 class PlayerControls extends StatelessWidget {
   const PlayerControls({
@@ -53,15 +54,30 @@ class PlayerControls extends StatelessWidget {
                 right: 16,
                 curve: Curves.fastEaseInToSlowEaseOut,
                 duration: const Duration(milliseconds: 650),
-                child: Slider(
-                  value: sp.videoController!.value.position.inMilliseconds.toDouble(),
-                  min: 0,
-                  max: sp.videoController!.value.duration.inMilliseconds.toDouble(),
-                  onChanged: (value) {},
-                  onChangeEnd: (value) {
-                    sp.sendSessionActionDuration(value.toInt());
-                  },
-                ),
+                child: Row(
+                  children: [
+                    Slider(
+                      value: sp.videoController!.value.volume,
+                      min: 0,
+                      max: 1,
+                      onChanged: (value) {
+                        sp.setVolume(value);
+                      },
+                    ),
+                    Expanded(child: Slider(
+                      value: sp.videoController!.value.position.inMilliseconds.toDouble(),
+                      min: 0,
+                      max: sp.videoController!.value.duration.inMilliseconds.toDouble(),
+                      onChanged: (value) {},
+                      onChangeEnd: (value) {
+                        sp.sendSessionActionDuration(value.toInt());
+                      },
+                    ),),
+                    IconButton(onPressed: () async {
+                      sp.setFullscreen(!sp.fullscreen);
+                    }, icon: Icon(sp.fullscreen ? Icons.fullscreen_exit_rounded : Icons.fullscreen_rounded))
+                  ],
+                )
               ),
             ],
           ),

@@ -8,6 +8,7 @@ import 'package:movie_viewer/model/socket/user_handlers.dart';
 import 'package:movie_viewer/model/ux_provider.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:video_player/video_player.dart';
+import 'package:window_manager/window_manager.dart';
 
 class SocketProvider extends ChangeNotifier {
   ///Переменные
@@ -18,6 +19,7 @@ class SocketProvider extends ChangeNotifier {
   List<Session>? _sessions;
   UserHandlers? userHandlers;
   SessionHandlers? sessionHandlers;
+  bool fullscreen = false;
 
   ///Getters
   User? get currentUser => _currentUser;
@@ -145,6 +147,12 @@ class SocketProvider extends ChangeNotifier {
 
   goToMain() {
     uxProvider.animateWelcomePage(0);
+  }
+
+  setFullscreen(bool value) async {
+    await windowManager.setFullScreen(value);
+    fullscreen = await windowManager.isFullScreen();
+    notifyListeners();
   }
 
   bool connectToServer() {
@@ -306,6 +314,13 @@ class SocketProvider extends ChangeNotifier {
     if (currentUser != null && currentSession != null) {
       List<dynamic> dataPack = [currentSession!.sessionId, movie.pageUrl, movie.toJson()];
       socket.emit("get4kfilm", jsonEncode(dataPack));
+    }
+  }
+
+  Future<void> setVolume(double value) async {
+    await videoController!.setVolume(value);
+    if(audioController != null) {
+      await audioController!.setVolume(value);
     }
   }
 }
