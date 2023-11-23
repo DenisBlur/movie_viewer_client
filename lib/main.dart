@@ -38,7 +38,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
   registerWith(options: {
-    'video.decoders': ['D3D11', 'NVDEC', 'FFmpeg'],
+    'video.decoders': ['MFT:d3d=11', "D3D11", 'CUDA', 'FFmpeg'],
     'lowLatency': 1,
   });
 

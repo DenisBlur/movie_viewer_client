@@ -134,6 +134,13 @@ class SocketProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setVolume(double value) async {
+    await videoController!.setVolume(value);
+    if(audioController != null) {
+      await audioController!.setVolume(value);
+    }
+  }
+
   playerListener() async {
     if(checkLeader()) {
       currentMSeconds = videoController!.value.position.inMilliseconds;
@@ -258,9 +265,6 @@ class SocketProvider extends ChangeNotifier {
 
   ///Отправка действий Player.pauseOrPlay
   sendSessionAction(String action) {
-
-    print(action);
-
     if (currentSession != null) {
       var dataPack = {"data": action, "sessionId": currentSession!.sessionId};
       socket.emit("session_action", jsonEncode(dataPack));
@@ -307,20 +311,5 @@ class SocketProvider extends ChangeNotifier {
       return currentSession!.ownerSessionID == currentUser!.id;
     }
     return false;
-  }
-
-  ///Тестовые функции
-  get4KFilm(Movie movie) {
-    if (currentUser != null && currentSession != null) {
-      List<dynamic> dataPack = [currentSession!.sessionId, movie.pageUrl, movie.toJson()];
-      socket.emit("get4kfilm", jsonEncode(dataPack));
-    }
-  }
-
-  Future<void> setVolume(double value) async {
-    await videoController!.setVolume(value);
-    if(audioController != null) {
-      await audioController!.setVolume(value);
-    }
   }
 }

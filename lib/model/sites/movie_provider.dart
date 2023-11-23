@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hls_parser/flutter_hls_parser.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:movie_viewer/model/socket/socket_provider.dart';
@@ -14,7 +15,20 @@ class MovieProvider extends ChangeNotifier {
   SocketProvider socketProvider;
   String movieBaseDataLink = "https://kinoka.ru";
   List<Movie> _movies = [];
+  bool _loading = false;
+  PageController controller = PageController();
+  List<Variant>? variants;
+
+  Movie? selectedMovie;
+
+  bool get loading => _loading;
+
   List<Movie> get movies => _movies;
+
+  set loading(bool value) {
+    _loading = value;
+    notifyListeners();
+  }
 
   set movies(List<Movie> value) {
     _movies = value;
@@ -70,7 +84,48 @@ class MovieProvider extends ChangeNotifier {
     return localMovies;
   }
 
+  Future<void> setMovie(String streamLink) async {
+
+    // var response = await http.get(Uri.parse("$streamLink"));
+    // if(response.statusCode == 200) {
+    //   var playList = await HlsPlaylistParser.create().parseString(Uri.parse(streamLink), response.body) as HlsMediaPlaylist;
+    //
+    //   print(playList.baseUri);
+    //   print(playList.tags);
+    //
+    // }
+
+    socketProvider.setSessionFilm(selectedMovie!, streamLink, null);
+  }
+
   void getMovieStreamLink(Movie movie) {
+    loading = true;
     socketProvider.socket.emit("user_get_movie_link", movie.pageUrl);
+    socketProvider.socket.once("user_get_movie_link", (data) async {
+      controller.animateToPage(1, duration: const Duration(milliseconds: 650), curve: Curves.fastEaseInToSlowEaseOut);
+      try {
+        var playList = await HlsPlaylistParser.create().parseString(Uri.parse(data["url"]), data["responseBody"]) as HlsMasterPlaylist;
+        variants = playList.variants;
+        selectedMovie = movie;
+
+
+
+        notifyListeners();
+      } on ParserException catch (e) {
+        print(e);
+      }
+
+      loading = false;
+    });
+  }
+
+  void searchMovie(String value) {
+    controller.animateToPage(0, duration: const Duration(milliseconds: 650), curve: Curves.fastEaseInToSlowEaseOut);
+    loading = true;
+    socketProvider.socket.emit("user_search_movie", value);
+    socketProvider.socket.once("user_search_movie", (data) async {
+      movies = await _getMoviesOnPage(data);
+      loading = false;
+    });
   }
 }

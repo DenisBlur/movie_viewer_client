@@ -5,7 +5,7 @@ import 'package:movie_viewer/widgets/youtube_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../data/common.dart';
-import 'hq_movies_widget.dart';
+import 'base_movies_widget.dart';
 
 Future<void> showMyDialog(BuildContext context) async {
   TextEditingController controller = TextEditingController(text: "");

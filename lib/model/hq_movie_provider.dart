@@ -57,11 +57,6 @@ class HQMovieProvider extends ChangeNotifier {
 
     return localMovies;
   }
-  
-  setMovie(Movie movie) {
-    
-    socketProvider.get4KFilm(movie);
-    
-  }
+
 
 }
