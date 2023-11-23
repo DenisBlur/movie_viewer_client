@@ -84,25 +84,29 @@ class SocketProvider extends ChangeNotifier {
   }
 
   pauseMovie() async {
-    if (audioController != null) {
-      Duration? localDuration = await videoController!.position;
-      await audioController!.seekTo(localDuration!);
-      await audioController!.pause();
-      await videoController!.pause();
-    } else {
-      await videoController!.pause();
+    if(videoController != null) {
+      if (audioController != null) {
+        Duration? localDuration = await videoController!.position;
+        await audioController!.seekTo(localDuration!);
+        await audioController!.pause();
+        await videoController!.pause();
+      } else {
+        await videoController!.pause();
+      }
     }
     notifyListeners();
   }
 
   playMovie() async {
-    if (audioController != null) {
-      Duration? localDuration = await videoController!.position;
-      await audioController!.seekTo(localDuration!);
-      await audioController!.play();
-      await videoController!.play();
-    } else {
-      await videoController!.play();
+    if(videoController != null) {
+      if (audioController != null) {
+        Duration? localDuration = await videoController!.position;
+        await audioController!.seekTo(localDuration!);
+        await audioController!.play();
+        await videoController!.play();
+      } else {
+        await videoController!.play();
+      }
     }
     notifyListeners();
   }

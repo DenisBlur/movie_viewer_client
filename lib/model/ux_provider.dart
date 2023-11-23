@@ -45,7 +45,7 @@ class UxProvider extends ChangeNotifier {
     //showButtonChangeFilm = page == 2;
   }
 
-  void controlsBase(Offset value) {
+  void controlsBase() {
     if (_timer != null && _timer!.isActive) {
       _timer!.cancel();
     }

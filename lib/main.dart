@@ -41,6 +41,17 @@ Future<void> main() async {
     'video.decoders': ['D3D11', 'NVDEC', 'FFmpeg'],
     'lowLatency': 1,
   });
+
+  WindowOptions windowOptions = const WindowOptions(
+    size: Size(1280, 720),
+    center: true,
+    minimumSize: Size(1280, 720),
+  );
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
+  });
+
   runApp(const MyApp());
 }
 
