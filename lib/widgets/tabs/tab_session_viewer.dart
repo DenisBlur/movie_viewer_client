@@ -16,11 +16,22 @@ class TabSessionViewer extends StatelessWidget {
           const SliverToBoxAdapter(
             child: SizedBox(height: 16),
           ),
-          const SliverToBoxAdapter(
-            child: Text(
-              "Доступные сессии",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold, fontSize: 24),
+          SliverToBoxAdapter(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                IconButton(
+                    onPressed: () {
+                      socketProvider.goToMain();
+                    },
+                    icon: const Icon(Icons.navigate_before_rounded)),
+                const Text(
+                  "Доступные сессии",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                const Expanded(child: SizedBox())
+              ],
             ),
           ),
           const SliverToBoxAdapter(

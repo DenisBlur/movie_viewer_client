@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -13,7 +12,6 @@ import 'package:video_player/video_player.dart';
 class SocketProvider extends ChangeNotifier {
   ///Переменные
   UxProvider uxProvider;
-
   String? username = "User";
   User? _currentUser;
   Session? _currentSession;
@@ -39,14 +37,15 @@ class SocketProvider extends ChangeNotifier {
 
     if (value == null) {
       uxProvider.animateWelcomePage(0);
+      notifyListeners();
     } else {
-      uxProvider.animateWelcomePage(1);
       if (value.currentMovie != null) {
+        uxProvider.animateWelcomePage(3);
+      } else {
         uxProvider.animateWelcomePage(2);
+        notifyListeners();
       }
     }
-
-    notifyListeners();
   }
 
   set sessions(List<Session>? value) {
@@ -60,66 +59,88 @@ class SocketProvider extends ChangeNotifier {
   ///Плеер
   VideoPlayerController? videoController;
   VideoPlayerController? audioController;
-  bool isPlaying = false;
   bool canSync = false;
   int currentMSeconds = 0;
-  double maxSliderValue = 0;
 
   ///Конструктор
   SocketProvider({required this.uxProvider}) {
     userHandlers = UserHandlers(socketProvider: this);
     sessionHandlers = SessionHandlers(socketProvider: this);
 
-    // player.stream.duration.listen((event) {
-    //   maxSliderValue = event.inMilliseconds.toDouble();
-    // });
-    // player.stream.position.listen((event) {
-    //   currentMSeconds = event.inMilliseconds;
-    // });
-    // player.stream.playing.listen((event) {
-    //   isPlaying = event;
-    // });
-
     connectToServer();
   }
 
-  setMovie({required String video, String? audio}) {
+  setMovie({required String video, String? audio}) async {
     videoController = VideoPlayerController.networkUrl(Uri.parse(video));
     if (audio != null) {
       audioController = VideoPlayerController.networkUrl(Uri.parse(audio));
     }
-    videoController!.initialize().then((value) {
-      if(audioController != null) {
-        audioController!.initialize();
-      }
-      notifyListeners();
-    });
+    await videoController!.initialize();
+    videoController!.addListener(playerListener);
+    if (audio != null) {
+      await audioController!.initialize();
+    }
+    notifyListeners();
   }
 
   pauseMovie() async {
-    await videoController!.pause();
     if (audioController != null) {
+      Duration? localDuration = await videoController!.position;
+      await audioController!.seekTo(localDuration!);
       await audioController!.pause();
+      await videoController!.pause();
+    } else {
+      await videoController!.pause();
     }
+    notifyListeners();
   }
 
   playMovie() async {
-    videoController!.play().then((value) async {
-      if (audioController != null) {
-        Duration? localDuration = await videoController!.position;
-        await audioController!.play();
-        await audioController!.seekTo(localDuration!);
-      }
-    });
+    if (audioController != null) {
+      Duration? localDuration = await videoController!.position;
+      await audioController!.seekTo(localDuration!);
+      await audioController!.play();
+      await videoController!.play();
+    } else {
+      await videoController!.play();
+    }
+    notifyListeners();
+  }
+
+  seekMovie(int value) async {
+    if(audioController != null) {
+      await audioController!.seekTo(Duration(milliseconds: value));
+      await videoController!.seekTo(Duration(milliseconds: value));
+    } else {
+      await videoController!.seekTo(Duration(milliseconds: value));
+    }
+    notifyListeners();
   }
 
   stopMovie() async {
     if (videoController != null) {
+      videoController!.removeListener(playerListener);
       await videoController!.dispose();
       if (audioController != null) {
         await audioController!.dispose();
       }
     }
+    notifyListeners();
+  }
+
+  playerListener() async {
+    if(checkLeader()) {
+      currentMSeconds = videoController!.value.position.inMilliseconds;
+    }
+    updateView();
+  }
+
+  goToSessionViewer() {
+    uxProvider.animateWelcomePage(1);
+  }
+
+  goToMain() {
+    uxProvider.animateWelcomePage(0);
   }
 
   bool connectToServer() {
@@ -139,18 +160,14 @@ class SocketProvider extends ChangeNotifier {
       );
 
       ///Сессия
-      socket.on(
-          "session_user_connect", sessionHandlers!.handleSessionUserConnect);
-      socket.on("session_user_disconnect",
-          sessionHandlers!.handleSessionUserDisconnect);
+      socket.on("session_user_connect", sessionHandlers!.handleSessionUserConnect);
+      socket.on("session_user_disconnect", sessionHandlers!.handleSessionUserDisconnect);
       socket.on("session_update", sessionHandlers!.handleSessionUpdate);
       socket.on("session_set_movie", sessionHandlers!.handleSessionSetMovie);
       socket.on("session_sync_time", sessionHandlers!.handleSessionSyncTime);
       socket.on("session_action", sessionHandlers!.handleSessionAction);
-      socket.on(
-          "session_change_owner", sessionHandlers!.handleSessionChangeOwner);
-      socket.on("session_duration_action",
-          sessionHandlers!.handleSessionDurationAction);
+      socket.on("session_change_owner", sessionHandlers!.handleSessionChangeOwner);
+      socket.on("session_duration_action", sessionHandlers!.handleSessionDurationAction);
 
       ///Тестовые
       socket.on("socket_data", handleSocketData);
@@ -229,6 +246,9 @@ class SocketProvider extends ChangeNotifier {
 
   ///Отправка действий Player.pauseOrPlay
   sendSessionAction(String action) {
+
+    print(action);
+
     if (currentSession != null) {
       var dataPack = {"data": action, "sessionId": currentSession!.sessionId};
       socket.emit("session_action", jsonEncode(dataPack));
@@ -237,10 +257,7 @@ class SocketProvider extends ChangeNotifier {
 
   void sendPlayerTime() {
     if (currentSession != null) {
-      var dataPack = {
-        "data": currentMSeconds,
-        "sessionId": currentSession!.sessionId
-      };
+      var dataPack = {"data": currentMSeconds, "sessionId": currentSession!.sessionId};
 
       socket.emit("session_sync_time", jsonEncode(dataPack));
     }
@@ -283,11 +300,7 @@ class SocketProvider extends ChangeNotifier {
   ///Тестовые функции
   get4KFilm(Movie movie) {
     if (currentUser != null && currentSession != null) {
-      List<dynamic> dataPack = [
-        currentSession!.sessionId,
-        movie.pageUrl,
-        movie.toJson()
-      ];
+      List<dynamic> dataPack = [currentSession!.sessionId, movie.pageUrl, movie.toJson()];
       socket.emit("get4kfilm", jsonEncode(dataPack));
     }
   }

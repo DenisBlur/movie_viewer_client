@@ -12,91 +12,106 @@ class TabCurrentSessionSetting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 16, right: 16),
-      child: CustomScrollView(
-        slivers: [
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 16),
-          ),
-          SliverToBoxAdapter(
-            child: Text(
-              socketProvider.currentSession!.sessionName!,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-            ),
-          ),
-          if (socketProvider.checkLeader())
+
+    if(socketProvider.currentSession != null) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 16, right: 16),
+        child: CustomScrollView(
+          slivers: [
             const SliverToBoxAdapter(
               child: SizedBox(height: 16),
             ),
-          if (socketProvider.checkLeader())
             SliverToBoxAdapter(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: () {
-                        createFilmDialog(context);
-                      },
-                      child: const Text("Добавить фильм"),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    IconButton(onPressed: () {
+                      socketProvider.disconnectFromSession();
+                    }, icon: const Icon(Icons.navigate_before_rounded)),
+                    Text(
+                      socketProvider.currentSession!.sessionName!,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     ),
-                  ),
-                  const SizedBox(
-                    width: 16,
-                  ),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: () {
-                        findMovie(context);
-                      },
-                      child: const Text("Выбрать фильм"),
+                    Expanded(child: SizedBox())
+                  ],
+                )),
+            if (socketProvider.checkLeader())
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 16),
+              ),
+            if (socketProvider.checkLeader())
+              SliverToBoxAdapter(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () {
+                          createFilmDialog(context);
+                        },
+                        child: const Text("Добавить фильм"),
+                      ),
                     ),
-                  ),
-                  const SizedBox(
-                    width: 16,
-                  ),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: () {
-                        youtubeVideoDialog(context);
-                      },
-                      child: const Text("YouTube"),
+                    const SizedBox(
+                      width: 16,
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () {
+                          findMovie(context);
+                        },
+                        child: const Text("Выбрать фильм"),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 16,
+                    ),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () {
+                          youtubeVideoDialog(context);
+                        },
+                        child: const Text("YouTube"),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            if (socketProvider.checkLeader())
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 16),
+              ),
+            if (socketProvider.currentSession!.currentMovie != null)
+              SliverToBoxAdapter(
+                  child: MovieItem(
+                    movie: socketProvider.currentSession!.currentMovie!,
+                    callback: () {},
+                  )),
+            SliverToBoxAdapter(
+              child: Text(
+                "Пользователи ${socketProvider.currentSession!.connectedUsers!.length.toString()}/${socketProvider.currentSession!.maxUsers!
+                    .toString()}",
+                style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
               ),
             ),
-          if (socketProvider.checkLeader())
             const SliverToBoxAdapter(
-              child: SizedBox(height: 16),
+              child: SizedBox(height: 8),
             ),
-          if (socketProvider.currentSession!.currentMovie != null)
-            SliverToBoxAdapter(
-                child: MovieItem(
-              movie: socketProvider.currentSession!.currentMovie!,
-              callback: () {},
-            )),
-          SliverToBoxAdapter(
-            child: Text(
-              "Пользователи ${socketProvider.currentSession!.connectedUsers!.length.toString()}/${socketProvider.currentSession!.maxUsers!.toString()}",
-              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
-            ),
-          ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 8),
-          ),
-          SliverList.builder(
-            itemBuilder: (context, index) {
-              return UserItem(
-                user: socketProvider.currentSession!.connectedUsers![index],
-              );
-            },
-            itemCount: socketProvider.currentSession!.connectedUsers!.length,
-          )
-        ],
-      ),
-    );
+            SliverList.builder(
+              itemBuilder: (context, index) {
+                return UserItem(
+                  user: socketProvider.currentSession!.connectedUsers![index],
+                );
+              },
+              itemCount: socketProvider.currentSession!.connectedUsers!.length,
+            )
+          ],
+        ),
+      );
+    } else {
+      return const Text("Ничего нет :(");
+    }
   }
 }

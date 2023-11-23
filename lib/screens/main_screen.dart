@@ -6,6 +6,7 @@ import 'package:movie_viewer/widgets/tabs/tab_session_viewer.dart';
 import 'package:provider/provider.dart';
 
 import '../model/socket/socket_provider.dart';
+import '../widgets/tabs/tab_main.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
@@ -15,28 +16,17 @@ class MainScreen extends StatelessWidget {
     return Consumer<SocketProvider>(
       builder: (context, sp, child) {
         return Scaffold(
-          body: Row(
-            children: [
-              SideActionPanel(
-                socketProvider: sp,
-              ),
-              Expanded(
-                  child: PageView(
-                physics: const NeverScrollableScrollPhysics(),
-                controller: sp.uxProvider.pageController,
-                scrollDirection: Axis.horizontal,
-                children: [
-                  TabSessionViewer(socketProvider: sp),
-                  if (sp.currentSession != null)
-                    TabCurrentSessionSetting(
-                      socketProvider: sp,
-                    ),
-                  const TabMovieViewer()
-                ],
-              )),
-            ],
-          ),
-        );
+            body: PageView(
+          physics: const NeverScrollableScrollPhysics(),
+          controller: sp.uxProvider.pageController,
+          scrollDirection: Axis.horizontal,
+          children: [
+            TabMain(socketProvider: sp),
+            TabSessionViewer(socketProvider: sp),
+            TabCurrentSessionSetting(socketProvider: sp,),
+            const TabMovieViewer()
+          ],
+        ));
       },
     );
   }

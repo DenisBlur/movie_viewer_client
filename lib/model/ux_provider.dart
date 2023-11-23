@@ -42,7 +42,7 @@ class UxProvider extends ChangeNotifier {
 
   void animateWelcomePage(int page) {
     pageController.animateToPage(page, duration: const Duration(milliseconds: 650), curve: Curves.fastEaseInToSlowEaseOut);
-    showButtonChangeFilm = page == 2;
+    //showButtonChangeFilm = page == 2;
   }
 
   void controlsBase(Offset value) {

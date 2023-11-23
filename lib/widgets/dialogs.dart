@@ -256,28 +256,31 @@ Future<void> createSessionDialog(BuildContext context) async {
               ),
             ],
           ),
-          content: Column(
-            children: [
-              SizedBox(
-                width: 450,
-                child: TextField(
-                  controller: sessionNameController,
-                  decoration: const InputDecoration(
-                    label: Text("Название сессии"),
+          content: SizedBox(
+            height: 150,
+            child: Column(
+              children: [
+                SizedBox(
+                  width: 450,
+                  child: TextField(
+                    controller: sessionNameController,
+                    decoration: const InputDecoration(
+                      label: Text("Название сессии"),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(
-                width: 450,
-                child: TextField(
-                  controller: userMaxController,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: const InputDecoration(
-                    label: Text("Максимальное кол-во пользователей"),
+                SizedBox(
+                  width: 450,
+                  child: TextField(
+                    controller: userMaxController,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    decoration: const InputDecoration(
+                      label: Text("Максимальное кол-во пользователей"),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           actions: <Widget>[
             TextButton(

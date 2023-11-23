@@ -6,7 +6,7 @@ import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:movie_viewer/model/socket/socket_provider.dart';
 
-import '../data/common.dart';
+import '../../data/common.dart';
 
 class MovieProvider extends ChangeNotifier {
   MovieProvider({required this.socketProvider});

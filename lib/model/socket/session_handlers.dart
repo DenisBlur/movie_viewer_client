@@ -23,7 +23,7 @@ class SessionHandlers {
       //Если мы лидер то, запускаем таймер на передачу данных
       if (socketProvider!.checkLeader()) {
         Timer.periodic(const Duration(milliseconds: 200), (timer) {
-          if (socketProvider!.isPlaying) {
+          if (socketProvider!.videoController != null && socketProvider!.videoController!.value.isPlaying) {
             socketProvider!.sendPlayerTime();
           }
         });
@@ -37,8 +37,7 @@ class SessionHandlers {
     //Изменяем кол-во человек в сессии
     if (socketProvider!.sessions != null) {
       for (int i = 0; i < socketProvider!.sessions!.length; i++) {
-        if (socketProvider!.sessions![i].ownerSessionID ==
-            localSession.ownerSessionID) {
+        if (socketProvider!.sessions![i].ownerSessionID == localSession.ownerSessionID) {
           socketProvider!.sessions![i] = localSession;
           break;
         }
@@ -65,13 +64,10 @@ class SessionHandlers {
       //Обновление в списке сессий
       if (socketProvider!.sessions != null) {
         for (int i = 0; i < socketProvider!.sessions!.length; i++) {
-          if (socketProvider!.sessions![i].ownerSessionID ==
-              localSession.ownerSessionID) {
+          if (socketProvider!.sessions![i].ownerSessionID == localSession.ownerSessionID) {
             socketProvider!.sessions![i] = localSession;
           }
-          if (socketProvider!.currentSession != null &&
-              socketProvider!.currentSession!.ownerSessionID ==
-                  localSession.ownerSessionID) {
+          if (socketProvider!.currentSession != null && socketProvider!.currentSession!.ownerSessionID == localSession.ownerSessionID) {
             socketProvider!.currentSession = localSession;
           }
         }
@@ -107,14 +103,10 @@ class SessionHandlers {
     if (socketProvider!.currentSession != null && socketProvider!.currentSession!.sessionId == sessionId) {
       switch (action) {
         case "play":
-          if (!socketProvider!.isPlaying) {
-            await socketProvider!.playMovie();
-          }
+          await socketProvider!.playMovie();
           break;
         case "pause":
-          if (socketProvider!.isPlaying) {
-            await socketProvider!.pauseMovie();
-          }
+          await socketProvider!.pauseMovie();
           break;
       }
     }
@@ -134,17 +126,14 @@ class SessionHandlers {
 
   ///Установка фильма
   Future<void> handleSessionSetMovie(dynamic data) async {
-
     Session localSession = Session.fromJson(jsonDecode(data));
-    if(socketProvider!.currentSession != null) {
+    if (socketProvider!.currentSession != null) {
       if (socketProvider!.currentSession!.sessionId == localSession.sessionId) {
         socketProvider!.stopMovie();
         socketProvider!.currentSession = localSession;
         socketProvider!.setMovie(video: localSession.streamLink!, audio: localSession.audioLink);
-        socketProvider!.playMovie();
       }
     }
-
   }
 
   ///Смена позиции плеера
@@ -153,7 +142,8 @@ class SessionHandlers {
       int newDuration = int.parse(data[0].toString());
       String sessionId = data[1].toString();
       if (socketProvider!.currentSession!.sessionId == sessionId) {
-        //await socketProvider!.player.seek(Duration(milliseconds: newDuration));
+        await socketProvider!.seekMovie(newDuration);
+        await socketProvider!.pauseMovie();
       }
     }
   }
@@ -164,12 +154,10 @@ class SessionHandlers {
       int leaderMSecond = int.parse(data[0].toString());
       String sessionId = data[1].toString();
       if (socketProvider!.currentSession!.sessionId == sessionId) {
-        if (socketProvider!.currentMSeconds > leaderMSecond + 500 ||
-            socketProvider!.currentMSeconds < leaderMSecond - 500) {
+        if (socketProvider!.currentMSeconds > leaderMSecond + 500 || socketProvider!.currentMSeconds < leaderMSecond - 500) {
           //await socketProvider!.player.seek(Duration(milliseconds: leaderMSecond));
         }
       }
     }
   }
-
 }
