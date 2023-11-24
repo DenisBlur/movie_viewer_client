@@ -85,24 +85,17 @@ class MovieProvider extends ChangeNotifier {
   }
 
   Future<void> setMovie(String streamLink) async {
-
-    // var response = await http.get(Uri.parse("$streamLink"));
-    // if(response.statusCode == 200) {
-    //   var playList = await HlsPlaylistParser.create().parseString(Uri.parse(streamLink), response.body) as HlsMediaPlaylist;
-    //
-    //   print(playList.baseUri);
-    //   print(playList.tags);
-    //
-    // }
-
     socketProvider.setSessionFilm(selectedMovie!, streamLink, null);
   }
 
-  void getMovieStreamLink(Movie movie) {
+  void getMovieStreamLink({required Movie movie, bool scroll = true}) {
     loading = true;
     socketProvider.socket.emit("user_get_movie_link", movie.pageUrl);
     socketProvider.socket.once("user_get_movie_link", (data) async {
-      controller.animateToPage(1, duration: const Duration(milliseconds: 650), curve: Curves.fastEaseInToSlowEaseOut);
+
+      if(scroll) {
+        controller.animateToPage(1, duration: const Duration(milliseconds: 650), curve: Curves.fastEaseInToSlowEaseOut);
+      }
       try {
         var playList = await HlsPlaylistParser.create().parseString(Uri.parse(data["url"]), data["responseBody"]) as HlsMasterPlaylist;
         variants = playList.variants;

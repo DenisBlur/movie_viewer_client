@@ -33,7 +33,7 @@ class TabCurrentSessionSetting extends StatelessWidget {
                       socketProvider.currentSession!.sessionName!,
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     ),
-                    Expanded(child: SizedBox())
+                    const Expanded(child: SizedBox())
                   ],
                 )),
             if (socketProvider.checkLeader())
@@ -49,7 +49,7 @@ class TabCurrentSessionSetting extends StatelessWidget {
                     Expanded(
                       child: FilledButton(
                         onPressed: () {
-                          createFilmDialog(context);
+                          showMyDialog(context);
                         },
                         child: const Text("Добавить фильм"),
                       ),

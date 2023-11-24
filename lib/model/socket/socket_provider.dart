@@ -59,7 +59,8 @@ class SocketProvider extends ChangeNotifier {
   late Socket socket;
 
   ///Плеер
-  final player = Player(id: 1581815);
+  final player = Player(id: 13150);
+  Player? audioPlayer;
   bool canSync = false;
   int currentMSeconds = 0;
 
@@ -68,21 +69,53 @@ class SocketProvider extends ChangeNotifier {
     userHandlers = UserHandlers(socketProvider: this);
     sessionHandlers = SessionHandlers(socketProvider: this);
 
+    player.positionStream.listen((event) {
+      currentMSeconds = event.position!.inMilliseconds;
+    });
+
     connectToServer();
   }
 
   setMovie({required String video, String? audio}) async {
     player.open(Media.network(video), autoStart: false);
+    if (audio != null) {
+      audioPlayer = Player(id: 13155, commandlineArguments: ['--no-video']);
+      audioPlayer!.open(Media.network(audio), autoStart: false);
+      player.positionStream.listen((event) {
+        print(currentMSeconds);
+        if (audioPlayer != null) {
+          int audioMS = audioPlayer!.position.position!.inMilliseconds;
+          int videoMS = event.position!.inMilliseconds;
+
+          var delta = videoMS - audioMS;
+
+          if (delta.abs() > 300) {
+            audioPlayer!.seek(event.position!);
+            print(delta);
+          }
+        }
+      });
+    } else {
+      if (audioPlayer != null) {
+        audioPlayer!.dispose();
+      }
+    }
     notifyListeners();
   }
 
   pauseMovie() async {
     player.pause();
+    if (audioPlayer != null) {
+      audioPlayer!.pause();
+    }
     notifyListeners();
   }
 
   playMovie() async {
     player.play();
+    if (audioPlayer != null) {
+      audioPlayer!.play();
+    }
     notifyListeners();
   }
 
@@ -93,11 +126,17 @@ class SocketProvider extends ChangeNotifier {
 
   stopMovie() async {
     player.stop();
+    if (audioPlayer != null) {
+      audioPlayer!.stop();
+    }
     notifyListeners();
   }
 
-  Future<void> setVolume(double value) async {
+  setVolume(double value) {
     player.setVolume(value);
+    if (audioPlayer != null) {
+      audioPlayer!.setVolume(value);
+    }
     notifyListeners();
   }
 
@@ -178,6 +217,7 @@ class SocketProvider extends ChangeNotifier {
   }
 
   void disconnectFromSession() {
+    setFullscreen(false);
     if (currentSession != null) {
       List<dynamic> data = [currentUser, currentSession];
       socket.emit("session_disconnect", jsonEncode(data));
@@ -264,5 +304,13 @@ class SocketProvider extends ChangeNotifier {
       return currentSession!.ownerSessionID == currentUser!.id;
     }
     return false;
+  }
+
+  String printDuration(Duration duration) {
+    String negativeSign = duration.isNegative ? '-' : '';
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60).abs());
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60).abs());
+    return "$negativeSign${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
   }
 }

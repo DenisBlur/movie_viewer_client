@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../data/common.dart';
 import 'base_movies_widget.dart';
+import 'custom_movie_widget.dart';
 
 Future<void> showMyDialog(BuildContext context) async {
   TextEditingController controller = TextEditingController(text: "");
@@ -27,16 +28,7 @@ Future<void> showMyDialog(BuildContext context) async {
               ),
             ],
           ),
-          content: SizedBox(
-            width: 450,
-            child: TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                label: Text("Ссылка"),
-                hintText: "http://.....",
-              ),
-            ),
-          ),
+          content: const CustomMovieFinder(),
           actions: <Widget>[
             TextButton(
               child: const Text('Отмена'),

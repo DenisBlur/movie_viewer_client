@@ -72,7 +72,7 @@ class _BaseMovieFinderState extends State<BaseMovieFinder> {
                                 return MovieItem(
                                   movie: movie,
                                   callback: () {
-                                    mp.getMovieStreamLink(movie);
+                                    mp.getMovieStreamLink(movie: movie);
                                   },
                                 );
                               },
