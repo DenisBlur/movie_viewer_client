@@ -3,8 +3,8 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  dart_vlc
   dynamic_color
-  fvp
   screen_retriever
   window_manager
 )

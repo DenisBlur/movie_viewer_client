@@ -1,7 +1,8 @@
+import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/material.dart';
 import 'package:movie_viewer/model/socket/socket_provider.dart';
-import 'package:video_player/video_player.dart';
-import 'package:fvp/fvp.dart' as fvp;
+
+final player = Player(id: 69420);
 
 class TestScreen extends StatefulWidget {
   const TestScreen({super.key});
@@ -12,55 +13,28 @@ class TestScreen extends StatefulWidget {
 
 class _TestScreenState extends State<TestScreen> {
 
-  late VideoPlayerController _controller;
 
   @override
   void initState() {
+    player.open(Media.network("https://950-8ca-2500g0.v.plground.live:10402/hs/30/1700794593/S3g5CUEDbTJgonCiY1XX6g/973/10973/index-f4-v1-f5-a1.m3u8"));
+    player.play();
     super.initState();
-
-    _controller = VideoPlayerController.networkUrl(
-        Uri.parse('https://9bc-a3e-2200g0.v.plground.live:10402/hs/32/1700677185/K16zr76c2RaJz-EWigW5cg/976/566976/4/index-f2-v1-sa4-a1.m3u8'));
-
-    _controller = VideoPlayerController.networkUrl(
-        Uri.parse('https://9bc-a3e-2200g0.v.plground.live:10402/hs/32/1700677185/K16zr76c2RaJz-EWigW5cg/976/566976/4/index-f2-v1-sa4-a1.m3u8'));
-
-    _controller.addListener(() {
-      setState(() {});
-    });
-    _controller.setLooping(true);
-    _controller.initialize().then((_) => setState(() {}));
-    _controller.play();
-
   }
 
   @override
   void dispose() {
-    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(body: SingleChildScrollView(
-      child: Column(
-        children: <Widget>[
-          const Text('With assets mp4'),
-          Container(
-            padding: const EdgeInsets.all(20),
-            child: AspectRatio(
-              aspectRatio: _controller.value.aspectRatio,
-              child: Stack(
-                alignment: Alignment.bottomCenter,
-                children: <Widget>[
-                  VideoPlayer(_controller),
-                  //ControlsOverlay(controller: _controller, socketProvider: null,),
-                  VideoProgressIndicator(_controller, allowScrubbing: true),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+      child: Video(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        player: player,
+        showControls: true,
+      )
     ),);
   }
 }

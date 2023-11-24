@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:movie_viewer/data/common.dart';
 import 'package:movie_viewer/data/save_data.dart';
@@ -7,7 +8,6 @@ import 'package:movie_viewer/model/socket/session_handlers.dart';
 import 'package:movie_viewer/model/socket/user_handlers.dart';
 import 'package:movie_viewer/model/ux_provider.dart';
 import 'package:socket_io_client/socket_io_client.dart';
-import 'package:video_player/video_player.dart';
 import 'package:window_manager/window_manager.dart';
 
 class SocketProvider extends ChangeNotifier {
@@ -59,8 +59,7 @@ class SocketProvider extends ChangeNotifier {
   late Socket socket;
 
   ///Плеер
-  VideoPlayerController? videoController;
-  VideoPlayerController? audioController;
+  final player = Player(id: 1581815);
   bool canSync = false;
   int currentMSeconds = 0;
 
@@ -73,79 +72,33 @@ class SocketProvider extends ChangeNotifier {
   }
 
   setMovie({required String video, String? audio}) async {
-    videoController = VideoPlayerController.networkUrl(Uri.parse(video));
-    if (audio != null) {
-      audioController = VideoPlayerController.networkUrl(Uri.parse(audio));
-    }
-    await videoController!.initialize();
-    videoController!.addListener(playerListener);
-    if (audio != null) {
-      await audioController!.initialize();
-    }
+    player.open(Media.network(video), autoStart: false);
     notifyListeners();
   }
 
   pauseMovie() async {
-    if(videoController != null) {
-      if (audioController != null) {
-        Duration? localDuration = await videoController!.position;
-        await audioController!.seekTo(localDuration!);
-        await audioController!.pause();
-        await videoController!.pause();
-      } else {
-        await videoController!.pause();
-      }
-    }
+    player.pause();
     notifyListeners();
   }
 
   playMovie() async {
-    if(videoController != null) {
-      if (audioController != null) {
-        Duration? localDuration = await videoController!.position;
-        await audioController!.seekTo(localDuration!);
-        await audioController!.play();
-        await videoController!.play();
-      } else {
-        await videoController!.play();
-      }
-    }
+    player.play();
     notifyListeners();
   }
 
   seekMovie(int value) async {
-    if(audioController != null) {
-      await audioController!.seekTo(Duration(milliseconds: value));
-      await videoController!.seekTo(Duration(milliseconds: value));
-    } else {
-      await videoController!.seekTo(Duration(milliseconds: value));
-    }
+    player.seek(Duration(milliseconds: value));
     notifyListeners();
   }
 
   stopMovie() async {
-    if (videoController != null) {
-      videoController!.removeListener(playerListener);
-      await videoController!.dispose();
-      if (audioController != null) {
-        await audioController!.dispose();
-      }
-    }
+    player.stop();
     notifyListeners();
   }
 
   Future<void> setVolume(double value) async {
-    await videoController!.setVolume(value);
-    if(audioController != null) {
-      await audioController!.setVolume(value);
-    }
-  }
-
-  playerListener() async {
-    if(checkLeader()) {
-      currentMSeconds = videoController!.value.position.inMilliseconds;
-    }
-    updateView();
+    player.setVolume(value);
+    notifyListeners();
   }
 
   goToSessionViewer() {

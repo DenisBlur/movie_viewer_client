@@ -20,9 +20,18 @@ dependencies:
   shared_preferences: ^2.2.1
   transparent_image: ^2.0.0
   youtube_explode_dart: ^2.0.2
-  fvp: ^0.11.0
-  video_player: ^2.8.1
   flutter_hls_parser: ^2.0.1
+  dart_vlc:
+    git:
+      url: https://github.com/alexmercerind/dart_vlc.git
+      ref: master
+
+dependency_overrides:
+  dart_vlc_ffi:
+    git:
+      url: https://github.com/alexmercerind/dart_vlc.git
+      ref: master
+      path: ffi
 
 dev_dependencies:
   flutter_test:
