@@ -23,7 +23,7 @@ class SessionHandlers {
       //Если мы лидер то, запускаем таймер на передачу данных
       if (socketProvider!.checkLeader()) {
         Timer.periodic(const Duration(milliseconds: 200), (timer) {
-          if (socketProvider!.videoController != null && socketProvider!.videoController!.value.isPlaying) {
+          if (socketProvider!.player.playback.isPlaying) {
             socketProvider!.sendPlayerTime();
           }
         });
@@ -155,7 +155,7 @@ class SessionHandlers {
       String sessionId = data[1].toString();
       if (socketProvider!.currentSession!.sessionId == sessionId) {
         if (socketProvider!.currentMSeconds > leaderMSecond + 500 || socketProvider!.currentMSeconds < leaderMSecond - 500) {
-          //await socketProvider!.player.seek(Duration(milliseconds: leaderMSecond));
+          socketProvider!.seekMovie(socketProvider!.currentMSeconds);
         }
       }
     }

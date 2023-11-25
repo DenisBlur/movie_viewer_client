@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:movie_viewer/data/common.dart';
 import 'package:movie_viewer/data/save_data.dart';
@@ -7,7 +8,6 @@ import 'package:movie_viewer/model/socket/session_handlers.dart';
 import 'package:movie_viewer/model/socket/user_handlers.dart';
 import 'package:movie_viewer/model/ux_provider.dart';
 import 'package:socket_io_client/socket_io_client.dart';
-import 'package:video_player/video_player.dart';
 import 'package:window_manager/window_manager.dart';
 
 class SocketProvider extends ChangeNotifier {
@@ -59,8 +59,8 @@ class SocketProvider extends ChangeNotifier {
   late Socket socket;
 
   ///Плеер
-  VideoPlayerController? videoController;
-  VideoPlayerController? audioController;
+  final player = Player(id: 13150);
+  Player? audioPlayer;
   bool canSync = false;
   int currentMSeconds = 0;
 
@@ -69,83 +69,75 @@ class SocketProvider extends ChangeNotifier {
     userHandlers = UserHandlers(socketProvider: this);
     sessionHandlers = SessionHandlers(socketProvider: this);
 
+    player.positionStream.listen((event) {
+      currentMSeconds = event.position!.inMilliseconds;
+    });
+
     connectToServer();
   }
 
   setMovie({required String video, String? audio}) async {
-    videoController = VideoPlayerController.networkUrl(Uri.parse(video));
+    player.open(Media.network(video), autoStart: false);
     if (audio != null) {
-      audioController = VideoPlayerController.networkUrl(Uri.parse(audio));
-    }
-    await videoController!.initialize();
-    videoController!.addListener(playerListener);
-    if (audio != null) {
-      await audioController!.initialize();
+      audioPlayer = Player(id: 13155, commandlineArguments: ['--no-video']);
+      audioPlayer!.open(Media.network(audio), autoStart: false);
+      player.positionStream.listen((event) {
+        print(currentMSeconds);
+        if (audioPlayer != null) {
+          int audioMS = audioPlayer!.position.position!.inMilliseconds;
+          int videoMS = event.position!.inMilliseconds;
+
+          var delta = videoMS - audioMS;
+
+          if (delta.abs() > 300) {
+            audioPlayer!.seek(event.position!);
+            print(delta);
+          }
+        }
+      });
+    } else {
+      if (audioPlayer != null) {
+        audioPlayer!.dispose();
+      }
     }
     notifyListeners();
   }
 
   pauseMovie() async {
-    if(videoController != null) {
-      if (audioController != null) {
-        Duration? localDuration = await videoController!.position;
-        await audioController!.seekTo(localDuration!);
-        await audioController!.pause();
-        await videoController!.pause();
-      } else {
-        await videoController!.pause();
-      }
+    player.pause();
+    if (audioPlayer != null) {
+      audioPlayer!.pause();
     }
     notifyListeners();
   }
 
   playMovie() async {
-    if(videoController != null) {
-      if (audioController != null) {
-        Duration? localDuration = await videoController!.position;
-        await audioController!.seekTo(localDuration!);
-        await audioController!.play();
-        await videoController!.play();
-      } else {
-        await videoController!.play();
-      }
+    player.play();
+    if (audioPlayer != null) {
+      audioPlayer!.play();
     }
     notifyListeners();
   }
 
   seekMovie(int value) async {
-    if(audioController != null) {
-      await audioController!.seekTo(Duration(milliseconds: value));
-      await videoController!.seekTo(Duration(milliseconds: value));
-    } else {
-      await videoController!.seekTo(Duration(milliseconds: value));
-    }
+    player.seek(Duration(milliseconds: value));
     notifyListeners();
   }
 
   stopMovie() async {
-    if (videoController != null) {
-      videoController!.removeListener(playerListener);
-      await videoController!.dispose();
-      if (audioController != null) {
-        await audioController!.dispose();
-      }
+    player.stop();
+    if (audioPlayer != null) {
+      audioPlayer!.stop();
     }
     notifyListeners();
   }
 
-  Future<void> setVolume(double value) async {
-    await videoController!.setVolume(value);
-    if(audioController != null) {
-      await audioController!.setVolume(value);
+  setVolume(double value) {
+    player.setVolume(value);
+    if (audioPlayer != null) {
+      audioPlayer!.setVolume(value);
     }
-  }
-
-  playerListener() async {
-    if(checkLeader()) {
-      currentMSeconds = videoController!.value.position.inMilliseconds;
-    }
-    updateView();
+    notifyListeners();
   }
 
   goToSessionViewer() {
@@ -225,6 +217,7 @@ class SocketProvider extends ChangeNotifier {
   }
 
   void disconnectFromSession() {
+    setFullscreen(false);
     if (currentSession != null) {
       List<dynamic> data = [currentUser, currentSession];
       socket.emit("session_disconnect", jsonEncode(data));
@@ -311,5 +304,13 @@ class SocketProvider extends ChangeNotifier {
       return currentSession!.ownerSessionID == currentUser!.id;
     }
     return false;
+  }
+
+  String printDuration(Duration duration) {
+    String negativeSign = duration.isNegative ? '-' : '';
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60).abs());
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60).abs());
+    return "$negativeSign${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
   }
 }

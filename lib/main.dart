@@ -1,14 +1,15 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
-import 'package:fvp/fvp.dart';
 import 'package:movie_viewer/model/hq_movie_provider.dart';
 import 'package:movie_viewer/model/sites/movie_provider.dart';
 import 'package:movie_viewer/model/sites/youtube_provider.dart';
 import 'package:movie_viewer/model/ux_provider.dart';
 import 'package:movie_viewer/screens/main_screen.dart';
+import 'package:movie_viewer/screens/test_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:dart_vlc/dart_vlc.dart';
 
 import 'model/socket/socket_provider.dart';
 
@@ -36,12 +37,8 @@ List<SingleChildWidget> _providers = [
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  DartVLC.initialize();
   await windowManager.ensureInitialized();
-  registerWith(options: {
-    'video.decoders': ['MFT:d3d=11', "D3D11", 'CUDA', 'FFmpeg'],
-    'lowLatency': 1,
-  });
-
   WindowOptions windowOptions = const WindowOptions(
     size: Size(1280, 720),
     center: true,
@@ -77,7 +74,7 @@ class MyApp extends StatelessWidget {
                 useMaterial3: true,
                 platform: TargetPlatform.iOS,
               ),
-              home: const MainScreen(),
+              home: MainScreen(),
             );
           },
         );

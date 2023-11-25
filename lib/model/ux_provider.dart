@@ -10,7 +10,15 @@ class UxProvider extends ChangeNotifier {
   bool _showUserPanel = false;
   bool _showAdminPanel = false;
   bool _showControls = false;
+  bool _showVolume = false;
   bool _showButtonChangeFilm = false;
+
+  bool get showVolume => _showVolume;
+
+  set showVolume(bool value) {
+    _showVolume = value;
+    notifyListeners();
+  }
 
   bool get showButtonChangeFilm => _showButtonChangeFilm;
 
@@ -50,8 +58,10 @@ class UxProvider extends ChangeNotifier {
       _timer!.cancel();
     }
     if(!_showAdminPanel && !_showUserPanel) {
-      _timer = Timer(const Duration(seconds: 3), () {
-        showControls = false;
+      _timer = Timer(const Duration(seconds: 1), () {
+        if(!showVolume) {
+          showControls = false;
+        }
       });
     }
 

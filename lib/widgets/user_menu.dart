@@ -7,9 +7,9 @@ import 'package:movie_viewer/widgets/items/user_item.dart';
 import 'package:provider/provider.dart';
 
 class UserMenu extends StatelessWidget {
-  const UserMenu({super.key, required this.pr});
+  const UserMenu({super.key, required this.sp});
 
-  final SocketProvider pr;
+  final SocketProvider sp;
 
   @override
   Widget build(BuildContext context) {
@@ -18,9 +18,9 @@ class UserMenu extends StatelessWidget {
         return AnimatedPositioned(
           duration: const Duration(milliseconds: 650),
           curve: Curves.fastEaseInToSlowEaseOut,
-          right: ux.showUserPanel ? 32 : -400,
-          top: 32,
-          bottom: 114,
+          right: ux.showUserPanel ? 16 : -400,
+          top: 64+16,
+          bottom: 94,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: BackdropFilter(
@@ -45,9 +45,9 @@ class UserMenu extends StatelessWidget {
                       width: 200,
                       child: ListView.builder(
                           itemBuilder: (context, index) {
-                            return UserItem(user: pr.currentSession!.connectedUsers![index],);
+                            return UserItem(user: sp.currentSession!.connectedUsers![index],);
                           },
-                          itemCount: pr.currentSession!.connectedUsers!.length),
+                          itemCount: sp.currentSession!.connectedUsers!.length),
                     ),
                   ],
                 ),

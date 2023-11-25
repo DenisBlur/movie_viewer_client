@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:movie_viewer/data/common.dart';
 
 var movieCardW = 200.0;
-var movieCardH = 200.0;
+var movieCardH = 350.0;
 
 class MovieItem extends StatefulWidget {
   const MovieItem({super.key, required this.movie, required this.callback});
