@@ -56,7 +56,7 @@ class SocketProvider extends ChangeNotifier {
   }
 
   ///Сокет
-  late Socket socket;
+  Socket? socket;
 
   ///Плеер
   final player = Player(id: 13150);
@@ -154,43 +154,48 @@ class SocketProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool connectToServer() {
+  bool connectToServer({String? ip = "95.105.56.9", String? port = "3000"}) {
+
+    if(socket != null && socket!.connected) {
+      socket!.dispose();
+    }
+
     try {
-      socket = io("http://95.105.56.9:3000", <String, dynamic>{
+      socket = io("http://$ip:$port", <String, dynamic>{
         'transports': ['websocket'],
         'autoConnect': false,
       });
-      socket.connect();
+
+      socket!.connect();
 
       ///Пользователи
-      socket.on('user_create', userHandlers!.handleUserCreate);
-      socket.on("user_change_username", userHandlers!.handleUserChangeUsername);
-      socket.on(
+      socket!.on('user_create', userHandlers!.handleUserCreate);
+      socket!.on("user_change_username", userHandlers!.handleUserChangeUsername);
+      socket!.on(
         "user_get_movie_link",
         (data) {},
       );
 
       ///Сессия
-      socket.on("session_user_connect", sessionHandlers!.handleSessionUserConnect);
-      socket.on("session_user_disconnect", sessionHandlers!.handleSessionUserDisconnect);
-      socket.on("session_update", sessionHandlers!.handleSessionUpdate);
-      socket.on("session_set_movie", sessionHandlers!.handleSessionSetMovie);
-      socket.on("session_sync_time", sessionHandlers!.handleSessionSyncTime);
-      socket.on("session_action", sessionHandlers!.handleSessionAction);
-      socket.on("session_change_owner", sessionHandlers!.handleSessionChangeOwner);
-      socket.on("session_duration_action", sessionHandlers!.handleSessionDurationAction);
+      socket!.on("session_user_connect", sessionHandlers!.handleSessionUserConnect);
+      socket!.on("session_user_disconnect", sessionHandlers!.handleSessionUserDisconnect);
+      socket!.on("session_update", sessionHandlers!.handleSessionUpdate);
+      socket!.on("session_set_movie", sessionHandlers!.handleSessionSetMovie);
+      socket!.on("session_sync_time", sessionHandlers!.handleSessionSyncTime);
+      socket!.on("session_action", sessionHandlers!.handleSessionAction);
+      socket!.on("session_change_owner", sessionHandlers!.handleSessionChangeOwner);
+      socket!.on("session_duration_action", sessionHandlers!.handleSessionDurationAction);
 
       ///Тестовые
-      socket.on("socket_data", handleSocketData);
-      socket.on('fromServer', (_) => print(_));
+      socket!.on("socket_data", handleSocketData);
+      socket!.on('fromServer', (_) => print(_));
     } catch (e) {
       if (kDebugMode) {
         print(e.toString());
       }
     }
-
     createUser();
-    return socket.connected;
+    return socket!.connected;
   }
 
   updateView() {
@@ -212,7 +217,7 @@ class SocketProvider extends ChangeNotifier {
 
     if (currentUser != null) {
       List<dynamic> data = [currentUser, session];
-      socket.emit("session_connect", jsonEncode(data));
+      socket!.emit("session_connect", jsonEncode(data));
     }
   }
 
@@ -220,7 +225,7 @@ class SocketProvider extends ChangeNotifier {
     setFullscreen(false);
     if (currentSession != null) {
       List<dynamic> data = [currentUser, currentSession];
-      socket.emit("session_disconnect", jsonEncode(data));
+      socket!.emit("session_disconnect", jsonEncode(data));
     }
   }
 
@@ -228,7 +233,7 @@ class SocketProvider extends ChangeNotifier {
   void changeUsername(String value) {
     ///если есть сохраненное имя, то подгружаем его
     SaveData().saveUsername(value);
-    socket.emit(
+    socket!.emit(
       "user_change_username",
       value,
     );
@@ -240,7 +245,7 @@ class SocketProvider extends ChangeNotifier {
       currentSession!.streamLink = streamLink;
       currentSession!.audioLink = audioLink;
 
-      socket.emit(
+      socket!.emit(
         "session_set_movie",
         currentSession,
       );
@@ -252,7 +257,7 @@ class SocketProvider extends ChangeNotifier {
     if (currentSession != null) {
       var dataPack = {"data": ms, "sessionId": currentSession!.sessionId};
 
-      socket.emit("session_duration_action", jsonEncode(dataPack));
+      socket!.emit("session_duration_action", jsonEncode(dataPack));
     }
   }
 
@@ -260,7 +265,7 @@ class SocketProvider extends ChangeNotifier {
   sendSessionAction(String action) {
     if (currentSession != null) {
       var dataPack = {"data": action, "sessionId": currentSession!.sessionId};
-      socket.emit("session_action", jsonEncode(dataPack));
+      socket!.emit("session_action", jsonEncode(dataPack));
     }
   }
 
@@ -268,7 +273,7 @@ class SocketProvider extends ChangeNotifier {
     if (currentSession != null) {
       var dataPack = {"data": currentMSeconds, "sessionId": currentSession!.sessionId};
 
-      socket.emit("session_sync_time", jsonEncode(dataPack));
+      socket!.emit("session_sync_time", jsonEncode(dataPack));
     }
   }
 
@@ -276,7 +281,7 @@ class SocketProvider extends ChangeNotifier {
   createUser() async {
     username = await SaveData().loadUsername();
     username = username ?? "User";
-    socket.emit("user_create", username);
+    socket!.emit("user_create", username);
   }
 
   ///Создание сессии
@@ -294,7 +299,7 @@ class SocketProvider extends ChangeNotifier {
 
       List<dynamic> data = [currentUser, session.toJson()];
 
-      socket.emit("session_create", jsonEncode(data));
+      socket!.emit("session_create", jsonEncode(data));
     }
   }
 

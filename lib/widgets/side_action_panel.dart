@@ -62,7 +62,7 @@ class SideActionPanel extends StatelessWidget {
                   children: [
                     IconButton(
                         onPressed: () {
-                          changeNameDialog(context);
+                          changeServerDialog(context);
                         },
                         icon: const Icon(Icons.settings_rounded)),
                     const SizedBox(

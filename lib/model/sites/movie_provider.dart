@@ -90,8 +90,8 @@ class MovieProvider extends ChangeNotifier {
 
   void getMovieStreamLink({required Movie movie, bool scroll = true}) {
     loading = true;
-    socketProvider.socket.emit("user_get_movie_link", movie.pageUrl);
-    socketProvider.socket.once("user_get_movie_link", (data) async {
+    socketProvider.socket!.emit("user_get_movie_link", movie.pageUrl);
+    socketProvider.socket!.once("user_get_movie_link", (data) async {
 
       if(scroll) {
         controller.animateToPage(1, duration: const Duration(milliseconds: 650), curve: Curves.fastEaseInToSlowEaseOut);
@@ -115,8 +115,8 @@ class MovieProvider extends ChangeNotifier {
   void searchMovie(String value) {
     controller.animateToPage(0, duration: const Duration(milliseconds: 650), curve: Curves.fastEaseInToSlowEaseOut);
     loading = true;
-    socketProvider.socket.emit("user_search_movie", value);
-    socketProvider.socket.once("user_search_movie", (data) async {
+    socketProvider.socket!.emit("user_search_movie", value);
+    socketProvider.socket!.once("user_search_movie", (data) async {
       movies = await _getMoviesOnPage(data);
       loading = false;
     });

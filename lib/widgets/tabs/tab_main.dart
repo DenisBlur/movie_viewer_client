@@ -26,33 +26,66 @@ class TabMain extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ),
-
             SizedBox(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
-              child: Row(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  BigButton(
-                    onTap: () {
-                      createSessionDialog(context);
-                    },
-                    title: 'Создать сессию',
-                    icon: Icons.add_rounded,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      BigButton(
+                        onTap: () {
+                          createSessionDialog(context);
+                        },
+                        title: 'Создать сессию',
+                        icon: Icons.add_rounded,
+                      ),
+                      const SizedBox(
+                        width: 16,
+                      ),
+                      BigButton(
+                        onTap: () {
+                          socketProvider.goToSessionViewer();
+                        },
+                        title: 'Подключиться',
+                        icon: Icons.find_replace_rounded,
+                      ),
+                    ],
                   ),
-                  const SizedBox(
-                    width: 32,
-                  ),
-                  BigButton(
-                    onTap: () {
-                      socketProvider.goToSessionViewer();
-                    },
-                    title: 'Подключиться',
-                    icon: Icons.find_replace_rounded,
+                  const SizedBox(height: 16,),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      BigButton(
+                        onTap: () {
+                          changeServerDialog(context);
+                        },
+                        w: 250,
+                        h: 100,
+                        title: 'Сменить сервер',
+                        icon: Icons.web_asset_rounded,
+                      ),
+                      const SizedBox(
+                        width: 16,
+                      ),
+                      BigButton(
+                        onTap: () {
+                          changeNameDialog(context);
+                        },
+                        w: 250,
+                        h: 100,
+                        title: 'Сменить имя',
+                        icon: Icons.drive_file_rename_outline_rounded,
+                      ),
+                    ],
                   ),
                 ],
-              ),
+              )
             ),
             Positioned(
               left: 0,
@@ -78,11 +111,14 @@ class TabMain extends StatelessWidget {
 }
 
 class BigButton extends StatelessWidget {
-  const BigButton({super.key, required this.onTap, required this.title, required this.icon});
+  const BigButton({super.key, required this.onTap, required this.title, required this.icon, this.w = 250, this.h = 250});
 
   final VoidCallback onTap;
   final String title;
   final IconData icon;
+
+  final double? w;
+  final double? h;
 
   @override
   Widget build(BuildContext context) {
@@ -91,8 +127,8 @@ class BigButton extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       onTap: onTap,
       child: Container(
-        width: 250,
-        height: 250,
+        width: w,
+        height: h,
         decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer.withOpacity(.1), borderRadius: BorderRadius.circular(16)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

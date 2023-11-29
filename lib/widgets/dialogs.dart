@@ -48,7 +48,10 @@ Future<void> showMyDialog(BuildContext context) async {
       });
 }
 
-Future<void> findMovie(BuildContext context) async {
+Future<void> changeServerDialog(BuildContext context) async {
+  TextEditingController ip = TextEditingController();
+  TextEditingController port = TextEditingController();
+
   return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -61,12 +64,38 @@ Future<void> findMovie(BuildContext context) async {
                 width: 16,
               ),
               Text(
-                "Имя",
+                "Сервер",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
           ),
-          content: const BaseMovieFinder(),
+          content: SizedBox(
+            height: 128,
+            child: Column(
+              children: [
+                SizedBox(
+                  width: 450,
+                  child: TextField(
+                    controller: ip,
+                    decoration: const InputDecoration(
+                      label: Text("IP-Адрес"),
+                      hintText: "127.0.0.1",
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 450,
+                  child: TextField(
+                    controller: ip,
+                    decoration: const InputDecoration(
+                      label: Text("Порт"),
+                      hintText: "3000",
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           actions: <Widget>[
             TextButton(
               child: const Text('Отмена'),
@@ -74,15 +103,52 @@ Future<void> findMovie(BuildContext context) async {
                 Navigator.of(context).pop();
               },
             ),
+            TextButton(
+              child: const Text('Подключиться'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.read<SocketProvider>().connectToServer(ip: ip.text, port: port.text);
+              },
+            ),
           ],
         );
       });
 }
 
+Future<void> findMovie(BuildContext context) async {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.movie_creation_rounded, size: 36),
+            SizedBox(
+              width: 16,
+            ),
+            Text(
+              "Имя",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: const BaseMovieFinder(),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Отмена'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
 Future<void> changeNameDialog(BuildContext context) async {
   TextEditingController controller = TextEditingController(text: "");
-
-
 
   return showDialog<void>(
       context: context,
@@ -150,14 +216,16 @@ Future<void> youtubeVideoDialog(BuildContext context) async {
               ),
             ],
           ),
-          content: YoutubeWidget(urlController: urlController,),
+          content: YoutubeWidget(
+            urlController: urlController,
+          ),
         );
       });
 }
 
 Future<void> createFilmDialog(BuildContext context) async {
   TextEditingController movieNameController = TextEditingController(text: "");
-  TextEditingController movieYearController= TextEditingController(text: "");
+  TextEditingController movieYearController = TextEditingController(text: "");
   TextEditingController movieLinkController = TextEditingController(text: "");
 
   return showDialog<void>(
@@ -222,7 +290,10 @@ Future<void> createFilmDialog(BuildContext context) async {
               child: const Text('Отправить'),
               onPressed: () {
                 Navigator.of(context).pop();
-                context.read<SocketProvider>().setSessionFilm(Movie(pageUrl: null, coverUrl: null, kp: null, imdb: null, title: movieNameController.text, year: movieYearController.text), movieLinkController.text, null);
+                context.read<SocketProvider>().setSessionFilm(
+                    Movie(pageUrl: null, coverUrl: null, kp: null, imdb: null, title: movieNameController.text, year: movieYearController.text),
+                    movieLinkController.text,
+                    null);
               },
             ),
           ],
