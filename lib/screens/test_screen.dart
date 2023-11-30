@@ -29,11 +29,12 @@ class _TestScreenState extends State<TestScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(body: SingleChildScrollView(
-      child: Video(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        player: player,
-        showControls: true,
+      child: Column(
+        children: [
+          FilledButton(onPressed: () {
+
+          }, child: Text("Тестовая кнопка"))
+        ],
       )
     ),);
   }

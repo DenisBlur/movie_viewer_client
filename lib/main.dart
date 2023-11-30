@@ -70,6 +70,7 @@ class MyApp extends StatelessWidget {
                 platform: TargetPlatform.iOS,
               ),
               darkTheme: ThemeData(
+
                 colorScheme: darkColorScheme ?? _defaultDarkColorScheme,
                 useMaterial3: true,
                 platform: TargetPlatform.iOS,

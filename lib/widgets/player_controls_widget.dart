@@ -5,6 +5,7 @@ import 'package:movie_viewer/screens/test_screen.dart';
 import 'package:movie_viewer/widgets/user_menu.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:audio_video_progress_bar/audio_video_progress_bar.dart' as avp;
 
 class PlayerControls extends StatelessWidget {
   const PlayerControls({
@@ -38,27 +39,65 @@ class PlayerControls extends StatelessWidget {
                       Color(0xCC000000),
                     ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
                   )),
-              AnimatedScale(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.fastEaseInToSlowEaseOut,
-                scale: up.showControls ? 1 : 0,
-                child: Center(
-                  child: Icon(
-                    sp.player.playback.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                    color: Colors.white,
-                    size: 50,
-                    semanticLabel: 'Play',
-                  ),
-                ),
-              ),
               GestureDetector(
                 onTap: () {
-                  if(sp.player.playback.isPlaying) {
+                  if (sp.player.playback.isPlaying) {
                     sp.sendSessionAction("pause");
                   } else {
                     sp.sendSessionAction("play");
                   }
                 },
+              ),
+              AnimatedScale(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.fastEaseInToSlowEaseOut,
+                scale: up.showControls ? 1 : 0,
+                child: Center(
+                    child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        sp.sendSessionActionDuration(sp.currentMSeconds - 5000);
+                      },
+                      icon: const Icon(
+                        Icons.replay_5_rounded,
+                        color: Colors.white,
+                        size: 42,
+                        semanticLabel: 'Play',
+                      ),
+                    ),
+                    const SizedBox(width: 16,),
+                    IconButton(
+                      onPressed: () {
+                        if (sp.player.playback.isPlaying) {
+                          sp.sendSessionAction("pause");
+                        } else {
+                          sp.sendSessionAction("play");
+                        }
+                      },
+                      icon: Icon(
+                        sp.player.playback.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                        color: Colors.white,
+                        size: 64,
+                        semanticLabel: 'Play',
+                      ),
+                    ),
+                    const SizedBox(width: 16,),
+                    IconButton(
+                      onPressed: () {
+                        sp.sendSessionActionDuration(sp.currentMSeconds + 5000);
+                      },
+                      icon: const Icon(
+                        Icons.forward_5_rounded,
+                        color: Colors.white,
+                        size: 42,
+                        semanticLabel: 'Play',
+                      ),
+                    )
+                  ],
+                )),
               ),
               AnimatedPositioned(
                   top: up.showControls ? 16 : -200,
@@ -74,15 +113,16 @@ class PlayerControls extends StatelessWidget {
                           sp.disconnectFromSession();
                         },
                       ),
-                      if(sp.currentSession != null)
-                      Expanded(
-                        child: Text(
-                          sp.currentSession!.currentMovie!.title!,
-                          style: const TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
+                      if (sp.currentSession != null && sp.currentSession!.currentMovie != null)
+                        Expanded(
+                          child: Text(
+                            sp.currentSession!.currentMovie!.title!,
+                            style: const TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
-                      ),
                       FilledButton(
+                        focusNode: null,
                         child: const Icon(Icons.supervised_user_circle_rounded),
                         onPressed: () {
                           sp.uxProvider.showUserPanel = !sp.uxProvider.showUserPanel;
@@ -105,33 +145,29 @@ class PlayerControls extends StatelessWidget {
                         stream: sp.player.positionStream,
                         builder: (context, snapshot) {
                           if (snapshot.data != null) {
-
-                            return Text(sp.printDuration(snapshot.data!.position!));
-                          } else {
-                            return Text("00:00:00");
-                          }
-                        },
-                      ),
-                      StreamBuilder(
-                        stream: sp.player.positionStream,
-                        builder: (context, snapshot) {
-                          if (snapshot.data != null) {
                             return Expanded(
-                              child: Slider(
-                                label: "Hello",
-                                secondaryTrackValue: sp.player.bufferingProgress,
-                                value: snapshot.data!.position!.inMilliseconds.toDouble(),
-                                min: 0,
-                                max: snapshot.data!.duration!.inMilliseconds.toDouble(),
-                                onChanged: (value) {},
-                                onChangeEnd: (value) {
-                                  sp.sendSessionActionDuration(value.toInt());
+                              child: avp.ProgressBar(
+                                progress: snapshot.data!.position!,
+                                total: snapshot.data!.duration!,
+                                timeLabelLocation: avp.TimeLabelLocation.sides,
+                                onDragStart: (details) {
+                                  context.read<UxProvider>().seek = true;
+                                },
+                                onDragEnd: () {
+                                  context.read<UxProvider>().seek = false;
+                                },
+                                onDragUpdate: (details) {
+                                  sp.player.seek(details.timeStamp);
+                                },
+                                onSeek: (value) {
+                                  sp.sendSessionActionDuration(value.inMilliseconds);
                                 },
                               ),
                             );
                           } else {
                             return Expanded(
                               child: Slider(
+                                focusNode: null,
                                 value: 0,
                                 min: 0,
                                 max: 1,
@@ -141,18 +177,9 @@ class PlayerControls extends StatelessWidget {
                           }
                         },
                       ),
-                      StreamBuilder(
-                        stream: sp.player.positionStream,
-                        builder: (context, snapshot) {
-                          if (snapshot.data != null) {
-
-                            return Text(sp.printDuration(snapshot.data!.duration!));
-                          } else {
-                            return Text("00:00:00");
-                          }
-                        },
+                      const SizedBox(
+                        width: 16,
                       ),
-                      SizedBox(width: 16,),
                       MouseRegion(
                         onEnter: (event) {
                           sp.uxProvider.showVolume = true;
@@ -169,6 +196,7 @@ class PlayerControls extends StatelessWidget {
                               width: sp.uxProvider.showVolume ? 150 : 0,
                               child: ClipRRect(
                                 child: Slider(
+                                  focusNode: null,
                                   value: sp.player.general.volume,
                                   min: 0,
                                   max: 1,
@@ -182,6 +210,7 @@ class PlayerControls extends StatelessWidget {
                         ),
                       ),
                       IconButton(
+                          focusNode: null,
                           onPressed: () async {
                             sp.setFullscreen(!sp.fullscreen);
                           },

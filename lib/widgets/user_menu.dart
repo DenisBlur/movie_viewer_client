@@ -15,46 +15,63 @@ class UserMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<UxProvider>(
       builder: (context, ux, child) {
-        return AnimatedPositioned(
-          duration: const Duration(milliseconds: 650),
-          curve: Curves.fastEaseInToSlowEaseOut,
-          right: ux.showUserPanel ? 16 : -400,
-          top: 64+16,
-          bottom: 94,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor.withOpacity(.8), borderRadius: BorderRadius.circular(8)),
-                width: 200,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Пользователи",
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height - 238,
-                      width: 200,
-                      child: ListView.builder(
-                          itemBuilder: (context, index) {
-                            return UserItem(user: sp.currentSession!.connectedUsers![index],);
-                          },
-                          itemCount: sp.currentSession!.connectedUsers!.length),
-                    ),
-                  ],
+        if (sp.currentSession != null) {
+          return AnimatedPositioned(
+            duration: const Duration(milliseconds: 650),
+            curve: Curves.fastEaseInToSlowEaseOut,
+            right: ux.showUserPanel ? 16 : -400,
+            top: 64 + 16,
+            bottom: 94,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor.withOpacity(.8), borderRadius: BorderRadius.circular(8)),
+                  width: 200,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              "Пользователи",
+                              style: Theme.of(context).textTheme.labelLarge,
+                            ),
+                          ),
+                          IconButton(
+                              onPressed: () {
+                                sp.sendSessionActionDuration(sp.currentMSeconds);
+                              },
+                              icon: const Icon(Icons.refresh_rounded)),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height - 230 - 16,
+                        width: 200,
+                        child: ListView.builder(
+                            itemBuilder: (context, index) {
+                              return UserItem(
+                                user: sp.currentSession!.connectedUsers![index],
+                              );
+                            },
+                            itemCount: sp.currentSession!.connectedUsers!.length),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        );
+          );
+        } else {
+          return const SizedBox();
+        }
       },
     );
   }

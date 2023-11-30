@@ -20,14 +20,21 @@ class SessionHandlers {
     //Если это мы то устанавливаем currentSession
     if (localUser.id == socketProvider!.currentUser!.id!) {
       socketProvider!.currentSession = localSession;
-      //Если мы лидер то, запускаем таймер на передачу данных
-      if (socketProvider!.checkLeader()) {
-        Timer.periodic(const Duration(milliseconds: 200), (timer) {
-          if (socketProvider!.player.playback.isPlaying) {
-            socketProvider!.sendPlayerTime();
-          }
-        });
+
+      if(localSession.currentMovie != null) {
+        if(localSession.audioLink != null) {
+          socketProvider!.setMovie(video: localSession.streamLink!);
+        } else {
+          socketProvider!.setMovie(video: localSession.streamLink!, audio: localSession.audioLink);
+        }
       }
+
+      //Если мы лидер то, запускаем таймер на передачу данных
+      Timer.periodic(const Duration(milliseconds: 300), (timer) {
+        if (socketProvider!.player.playback.isPlaying) {
+          socketProvider!.sendPlayerTime();
+        }
+      });
     } else {
       //Устанавливаем сессии
       if (socketProvider!.currentSession != null) {
@@ -103,10 +110,10 @@ class SessionHandlers {
     if (socketProvider!.currentSession != null && socketProvider!.currentSession!.sessionId == sessionId) {
       switch (action) {
         case "play":
-          await socketProvider!.playMovie();
+          socketProvider!.playMovie();
           break;
         case "pause":
-          await socketProvider!.pauseMovie();
+          socketProvider!.pauseMovie();
           break;
       }
     }
@@ -144,6 +151,17 @@ class SessionHandlers {
       if (socketProvider!.currentSession!.sessionId == sessionId) {
         await socketProvider!.seekMovie(newDuration);
         await socketProvider!.pauseMovie();
+      }
+    }
+  }
+
+  ///Обновленгие времени пользователя на сервере
+  void handleSessionUserTimeUpdate(dynamic data) async {
+    if (socketProvider!.currentSession != null) {
+      Session localSession = Session.fromJson(jsonDecode(data));
+      if (socketProvider!.currentSession!.sessionId == localSession.sessionId) {
+        socketProvider!.currentSession = localSession;
+        socketProvider!.updateView();
       }
     }
   }

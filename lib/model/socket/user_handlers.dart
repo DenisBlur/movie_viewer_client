@@ -32,13 +32,13 @@ class UserHandlers {
           if(user.id == localUser.id) {
             var index = socketProvider!.currentSession!.connectedUsers!.indexOf(user);
             socketProvider!.currentSession!.connectedUsers![index] = localUser;
-            socketProvider!.notifyListeners();
+            socketProvider!.updateView();
             return;
           }
         }
       }
     }
-    socketProvider!.notifyListeners();
+    socketProvider!.updateView();
   }
 
 

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:movie_viewer/model/socket/socket_provider.dart';
+import 'package:provider/provider.dart';
 
 import '../../data/common.dart';
 
@@ -22,6 +24,8 @@ class UserItem extends StatelessWidget {
             style: Theme.of(context).textTheme.labelMedium,
           ),
           Text(user.id!, style: Theme.of(context).textTheme.labelSmall),
+          Text(context.read<SocketProvider>().durationToHMS(Duration(milliseconds: user.currentTime!)),
+              style: Theme.of(context).textTheme.labelSmall),
         ],
       ),
     );

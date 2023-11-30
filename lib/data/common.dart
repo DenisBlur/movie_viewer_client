@@ -22,19 +22,22 @@ class TagResponse {
 class User {
   String? id;
   String? username;
+  int? currentTime;
 
-  User({required this.id, required this.username});
+  User({required this.id, required this.username, this.currentTime = 0});
 
   String toJson() {
     Map map = {};
     map["id"] = id;
     map["username"] = username;
+    map["currentTime"] = currentTime;
     return jsonEncode(map);
   }
 
   User.fromJson(Map<String, dynamic> json) {
     id = json["id"];
     username = json["username"];
+    currentTime = json["currentTime"];
   }
 }
 

@@ -123,7 +123,7 @@ class BigButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-
+      focusNode: null,
       borderRadius: BorderRadius.circular(16),
       onTap: onTap,
       child: Container(

@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:movie_viewer/data/common.dart';
 import 'package:movie_viewer/data/save_data.dart';
 import 'package:movie_viewer/model/socket/session_handlers.dart';
@@ -59,9 +61,8 @@ class SocketProvider extends ChangeNotifier {
   Socket? socket;
 
   ///Плеер
-  final player = Player(id: 13150);
+  final player = Player(id: 13150 + Random().nextInt(5));
   Player? audioPlayer;
-  bool canSync = false;
   int currentMSeconds = 0;
 
   ///Конструктор
@@ -73,6 +74,30 @@ class SocketProvider extends ChangeNotifier {
       currentMSeconds = event.position!.inMilliseconds;
     });
 
+
+    // ServicesBinding.instance.keyboard.addHandler((event) {
+    //   final key = event.logicalKey.debugName;
+    //
+    //   if (event is KeyUpEvent && key == "Arrow Left") {
+    //     seekMovie(player.position.position!.inMilliseconds - 5000);
+    //     print("-5000");
+    //   } else if(key == "Arrow Right") {
+    //     seekMovie(player.position.position!.inMilliseconds + 5000);
+    //     print("+5000");
+    //   } else if(key == "Space") {
+    //     if(player.playback.isPlaying) {
+    //       pauseMovie();
+    //     } else {
+    //       playMovie();
+    //     }
+    //     print("PlayOrPause");
+    //   }
+    //
+    //   print(key);
+    //
+    //   return false;
+    // },);
+
     connectToServer();
   }
 
@@ -82,7 +107,6 @@ class SocketProvider extends ChangeNotifier {
       audioPlayer = Player(id: 13155, commandlineArguments: ['--no-video']);
       audioPlayer!.open(Media.network(audio), autoStart: false);
       player.positionStream.listen((event) {
-        print(currentMSeconds);
         if (audioPlayer != null) {
           int audioMS = audioPlayer!.position.position!.inMilliseconds;
           int videoMS = event.position!.inMilliseconds;
@@ -91,7 +115,6 @@ class SocketProvider extends ChangeNotifier {
 
           if (delta.abs() > 300) {
             audioPlayer!.seek(event.position!);
-            print(delta);
           }
         }
       });
@@ -103,7 +126,7 @@ class SocketProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  pauseMovie() async {
+  pauseMovie()  {
     player.pause();
     if (audioPlayer != null) {
       audioPlayer!.pause();
@@ -111,7 +134,7 @@ class SocketProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  playMovie() async {
+  playMovie()  {
     player.play();
     if (audioPlayer != null) {
       audioPlayer!.play();
@@ -119,12 +142,12 @@ class SocketProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  seekMovie(int value) async {
+  seekMovie(int value)  {
     player.seek(Duration(milliseconds: value));
     notifyListeners();
   }
 
-  stopMovie() async {
+  stopMovie()  {
     player.stop();
     if (audioPlayer != null) {
       audioPlayer!.stop();
@@ -185,6 +208,7 @@ class SocketProvider extends ChangeNotifier {
       socket!.on("session_action", sessionHandlers!.handleSessionAction);
       socket!.on("session_change_owner", sessionHandlers!.handleSessionChangeOwner);
       socket!.on("session_duration_action", sessionHandlers!.handleSessionDurationAction);
+      socket!.on("session_user_time_update", sessionHandlers!.handleSessionUserTimeUpdate);
 
       ///Тестовые
       socket!.on("socket_data", handleSocketData);
@@ -254,6 +278,9 @@ class SocketProvider extends ChangeNotifier {
 
   ///Отправка позиции плеера
   sendSessionActionDuration(int ms) {
+
+    currentMSeconds = ms;
+
     if (currentSession != null) {
       var dataPack = {"data": ms, "sessionId": currentSession!.sessionId};
 
@@ -269,11 +296,12 @@ class SocketProvider extends ChangeNotifier {
     }
   }
 
+  ///Отправка данных плеера на сервер
   void sendPlayerTime() {
-    if (currentSession != null) {
-      var dataPack = {"data": currentMSeconds, "sessionId": currentSession!.sessionId};
-
-      socket!.emit("session_sync_time", jsonEncode(dataPack));
+    if (currentSession != null  && currentUser != null) {
+      currentUser!.currentTime = currentMSeconds;
+      var dataPack = {"user": currentUser!.toJson(), "sessionId": currentSession!.sessionId};
+      socket!.emit("user_player_time", jsonEncode(dataPack));
     }
   }
 
@@ -311,7 +339,7 @@ class SocketProvider extends ChangeNotifier {
     return false;
   }
 
-  String printDuration(Duration duration) {
+  String durationToHMS(Duration duration) {
     String negativeSign = duration.isNegative ? '-' : '';
     String twoDigits(int n) => n.toString().padLeft(2, "0");
     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60).abs());

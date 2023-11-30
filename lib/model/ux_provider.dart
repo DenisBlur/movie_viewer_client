@@ -11,6 +11,7 @@ class UxProvider extends ChangeNotifier {
   bool _showAdminPanel = false;
   bool _showControls = false;
   bool _showVolume = false;
+  bool seek = false;
   bool _showButtonChangeFilm = false;
 
   bool get showVolume => _showVolume;
@@ -59,7 +60,7 @@ class UxProvider extends ChangeNotifier {
     }
     if(!_showAdminPanel && !_showUserPanel) {
       _timer = Timer(const Duration(seconds: 1), () {
-        if(!showVolume) {
+        if(!showVolume && !seek) {
           showControls = false;
         }
       });
