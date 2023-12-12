@@ -16,7 +16,6 @@ class MovieProvider extends ChangeNotifier {
   String movieBaseDataLink = "https://kinoka.ru";
   List<Movie> _movies = [];
   bool _loading = false;
-  PageController controller = PageController();
   List<Variant>? variants;
 
   Movie? selectedMovie;
@@ -84,36 +83,21 @@ class MovieProvider extends ChangeNotifier {
     return localMovies;
   }
 
-  Future<void> setMovie(String streamLink) async {
+  setMovie(String streamLink) {
     socketProvider.setSessionFilm(selectedMovie!, streamLink, null);
   }
 
-  void getMovieStreamLink({required Movie movie, bool scroll = true}) {
+  void getMovieStreamLink({required Movie movie}) {
     loading = true;
     socketProvider.socket!.emit("user_get_movie_link", movie.pageUrl);
     socketProvider.socket!.once("user_get_movie_link", (data) async {
-
-      if(scroll) {
-        controller.animateToPage(1, duration: const Duration(milliseconds: 650), curve: Curves.fastEaseInToSlowEaseOut);
-      }
-      try {
-        var playList = await HlsPlaylistParser.create().parseString(Uri.parse(data["url"]), data["responseBody"]) as HlsMasterPlaylist;
-        variants = playList.variants;
-        selectedMovie = movie;
-
-
-
-        notifyListeners();
-      } on ParserException catch (e) {
-        print(e);
-      }
-
+      selectedMovie = movie;
+      setMovie(data["url"]);
       loading = false;
     });
   }
 
   void searchMovie(String value) {
-    controller.animateToPage(0, duration: const Duration(milliseconds: 650), curve: Curves.fastEaseInToSlowEaseOut);
     loading = true;
     socketProvider.socket!.emit("user_search_movie", value);
     socketProvider.socket!.once("user_search_movie", (data) async {

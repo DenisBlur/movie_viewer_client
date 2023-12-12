@@ -1,10 +1,12 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:movie_viewer/model/socket/socket_provider.dart';
 import 'package:movie_viewer/model/ux_provider.dart';
-import 'package:movie_viewer/screens/test_screen.dart';
 import 'package:movie_viewer/widgets/user_menu.dart';
 import 'package:provider/provider.dart';
-import 'package:window_manager/window_manager.dart';
+
+// ignore: depend_on_referenced_packages
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart' as avp;
 
 class PlayerControls extends StatelessWidget {
@@ -68,7 +70,9 @@ class PlayerControls extends StatelessWidget {
                         semanticLabel: 'Play',
                       ),
                     ),
-                    const SizedBox(width: 16,),
+                    const SizedBox(
+                      width: 16,
+                    ),
                     IconButton(
                       onPressed: () {
                         if (sp.player.playback.isPlaying) {
@@ -84,7 +88,9 @@ class PlayerControls extends StatelessWidget {
                         semanticLabel: 'Play',
                       ),
                     ),
-                    const SizedBox(width: 16,),
+                    const SizedBox(
+                      width: 16,
+                    ),
                     IconButton(
                       onPressed: () {
                         sp.sendSessionActionDuration(sp.currentMSeconds + 5000);
@@ -110,17 +116,39 @@ class PlayerControls extends StatelessWidget {
                       FilledButton(
                         child: const Icon(Icons.navigate_before_rounded),
                         onPressed: () {
-                          sp.disconnectFromSession();
+                          if (sp.checkLeader()) {
+                            sp.sendSessionAction("goToSessionSetting");
+                          } else {
+                            sp.disconnectFromSession();
+                          }
                         },
                       ),
                       if (sp.currentSession != null && sp.currentSession!.currentMovie != null)
                         Expanded(
-                          child: Text(
-                            sp.currentSession!.currentMovie!.title!,
-                            style: const TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
+                            child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              sp.currentSession!.currentMovie!.title!,
+                              style: const TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                            DropdownButton(
+                              value: sp.resolutionVariants!.indexOf(sp.currentVariant!),
+                              items: [
+                                for (int i = 0; i < sp.resolutionVariants!.length; i++)
+                                  DropdownMenuItem(
+                                    value: i,
+                                    child: Text("Качество: ${sp.resolutionVariants![i].format.width.toString() == "null" ? "Аудио" : sp.resolutionVariants![i].format.width.toString()}" ),
+                                  )
+                              ],
+                              onChanged: (value) {
+                                sp.changeResolution(value!);
+                              },
+                            ),
+                          ],
+                        )),
                       FilledButton(
                         focusNode: null,
                         child: const Icon(Icons.supervised_user_circle_rounded),
@@ -136,86 +164,93 @@ class PlayerControls extends StatelessWidget {
                 right: 16,
                 curve: Curves.fastEaseInToSlowEaseOut,
                 duration: const Duration(milliseconds: 650),
-                child: Container(
-                  padding: const EdgeInsets.only(left: 24, right: 8, bottom: 8, top: 8),
-                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.background.withOpacity(.5), borderRadius: BorderRadius.circular(16)),
-                  child: Row(
-                    children: [
-                      StreamBuilder(
-                        stream: sp.player.positionStream,
-                        builder: (context, snapshot) {
-                          if (snapshot.data != null) {
-                            return Expanded(
-                              child: avp.ProgressBar(
-                                progress: snapshot.data!.position!,
-                                total: snapshot.data!.duration!,
-                                timeLabelLocation: avp.TimeLabelLocation.sides,
-                                onDragStart: (details) {
-                                  context.read<UxProvider>().seek = true;
-                                },
-                                onDragEnd: () {
-                                  context.read<UxProvider>().seek = false;
-                                },
-                                onDragUpdate: (details) {
-                                  sp.player.seek(details.timeStamp);
-                                },
-                                onSeek: (value) {
-                                  sp.sendSessionActionDuration(value.inMilliseconds);
-                                },
-                              ),
-                            );
-                          } else {
-                            return Expanded(
-                              child: Slider(
-                                focusNode: null,
-                                value: 0,
-                                min: 0,
-                                max: 1,
-                                onChanged: (value) {},
-                              ),
-                            );
-                          }
-                        },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      padding: const EdgeInsets.only(left: 24, right: 8, bottom: 8, top: 8),
+                      decoration:
+                          BoxDecoration(color: Theme.of(context).colorScheme.background.withOpacity(.8), borderRadius: BorderRadius.circular(16)),
+                      child: Row(
+                        children: [
+                          StreamBuilder(
+                            stream: sp.player.positionStream,
+                            builder: (context, snapshot) {
+                              if (snapshot.data != null) {
+                                return Expanded(
+                                  child: avp.ProgressBar(
+                                    progress: snapshot.data!.position!,
+                                    total: snapshot.data!.duration!,
+                                    timeLabelLocation: avp.TimeLabelLocation.sides,
+                                    onDragStart: (details) {
+                                      context.read<UxProvider>().seek = true;
+                                    },
+                                    onDragEnd: () {
+                                      context.read<UxProvider>().seek = false;
+                                    },
+                                    onDragUpdate: (details) {
+                                      sp.player.seek(details.timeStamp);
+                                    },
+                                    onSeek: (value) {
+                                      sp.sendSessionActionDuration(value.inMilliseconds);
+                                    },
+                                  ),
+                                );
+                              } else {
+                                return Expanded(
+                                  child: Slider(
+                                    focusNode: null,
+                                    value: 0,
+                                    min: 0,
+                                    max: 1,
+                                    onChanged: (value) {},
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                          const SizedBox(
+                            width: 16,
+                          ),
+                          MouseRegion(
+                            onEnter: (event) {
+                              sp.uxProvider.showVolume = true;
+                            },
+                            onExit: (event) {
+                              sp.uxProvider.showVolume = false;
+                            },
+                            child: Row(
+                              children: [
+                                const Icon(Icons.volume_up_rounded),
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 350),
+                                  curve: Curves.fastEaseInToSlowEaseOut,
+                                  width: sp.uxProvider.showVolume ? 150 : 0,
+                                  child: ClipRRect(
+                                    child: Slider(
+                                      focusNode: null,
+                                      value: sp.player.general.volume,
+                                      min: 0,
+                                      max: 1,
+                                      onChanged: (value) {
+                                        sp.setVolume(value);
+                                      },
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                              focusNode: null,
+                              onPressed: () async {
+                                sp.setFullscreen(!sp.fullscreen);
+                              },
+                              icon: Icon(sp.fullscreen ? Icons.fullscreen_exit_rounded : Icons.fullscreen_rounded))
+                        ],
                       ),
-                      const SizedBox(
-                        width: 16,
-                      ),
-                      MouseRegion(
-                        onEnter: (event) {
-                          sp.uxProvider.showVolume = true;
-                        },
-                        onExit: (event) {
-                          sp.uxProvider.showVolume = false;
-                        },
-                        child: Row(
-                          children: [
-                            const Icon(Icons.volume_up_rounded),
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 350),
-                              curve: Curves.fastEaseInToSlowEaseOut,
-                              width: sp.uxProvider.showVolume ? 150 : 0,
-                              child: ClipRRect(
-                                child: Slider(
-                                  focusNode: null,
-                                  value: sp.player.general.volume,
-                                  min: 0,
-                                  max: 1,
-                                  onChanged: (value) {
-                                    sp.setVolume(value);
-                                  },
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                          focusNode: null,
-                          onPressed: () async {
-                            sp.setFullscreen(!sp.fullscreen);
-                          },
-                          icon: Icon(sp.fullscreen ? Icons.fullscreen_exit_rounded : Icons.fullscreen_rounded))
-                    ],
+                    ),
                   ),
                 ),
               ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:movie_viewer/model/hq_movie_provider.dart';
 import 'package:movie_viewer/model/sites/movie_provider.dart';
 import 'package:movie_viewer/widgets/items/movie_item.dart';
 import 'package:provider/provider.dart';
@@ -43,61 +42,47 @@ class _BaseMovieFinderState extends State<BaseMovieFinder> {
   Widget build(BuildContext context) {
     return Consumer<MovieProvider>(
       builder: (context, mp, child) {
-        return SizedBox(
-          width: MediaQuery.of(context).size.width / 2,
-          height: MediaQuery.of(context).size.height / 2,
+        return Container(
+          padding: const EdgeInsets.all(16),
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
           child: Column(
             children: [
               TextField(
                 controller: textEditingController,
+                decoration: const InputDecoration(
+                  label: Text("Поиск фильма"),
+                  hintText: "...",
+                ),
                 onSubmitted: (value) {
                   mp.searchMovie(value);
                 },
               ),
               if (mp.loading) const LinearProgressIndicator(),
-              Expanded(
-                  child: PageView(
-                    controller: mp.controller,
-                    physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  ClipRRect(
-                    child: CustomScrollView(
-                      slivers: [
-                        if (mp.movies.isNotEmpty)
-                          SliverPadding(
-                            padding: const EdgeInsets.all(16),
-                            sliver: SliverGrid.builder(
-                              itemBuilder: (context, index) {
-                                Movie movie = mp.movies[index];
-                                return MovieItem(
-                                  movie: movie,
-                                  callback: () {
-                                    mp.getMovieStreamLink(movie: movie);
-                                  },
-                                );
+              Expanded(child: ClipRRect(
+                child: CustomScrollView(
+                  slivers: [
+                    if (mp.movies.isNotEmpty)
+                      SliverPadding(
+                        padding: const EdgeInsets.only(top: 16),
+                        sliver: SliverGrid.builder(
+                          itemBuilder: (context, index) {
+                            Movie movie = mp.movies[index];
+                            return MovieItem(
+                              movie: movie,
+                              callback: () {
+                                mp.getMovieStreamLink(movie: movie);
                               },
-                              itemCount: mp.movies.length,
-                              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                                  maxCrossAxisExtent: movieCardW, crossAxisSpacing: 16, mainAxisSpacing: 16, mainAxisExtent: movieCardH),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      if(mp.variants != null)
-                        for(var i in mp.variants!)
-                          TextButton(onPressed: () {
-                            Navigator.pop(context);
-                            mp.setMovie(i.url.toString());
-                          }, child: Text("${i.format.width}x${i.format.height}"))
-                    ],
-                  )
-                ],
-              )),
+                            );
+                          },
+                          itemCount: mp.movies.length,
+                          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: movieCardW, crossAxisSpacing: 16, mainAxisSpacing: 16, mainAxisExtent: movieCardH),
+                        ),
+                      ),
+                  ],
+                ),
+              ),),
             ],
           ),
         );

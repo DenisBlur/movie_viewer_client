@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:movie_viewer/widgets/tabs/tab_movie_viewer.dart';
-import 'package:movie_viewer/widgets/side_action_panel.dart';
 import 'package:movie_viewer/widgets/tabs/tab_current_session_setting.dart';
 import 'package:movie_viewer/widgets/tabs/tab_session_viewer.dart';
 import 'package:provider/provider.dart';

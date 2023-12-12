@@ -50,6 +50,11 @@ class SessionHandlers {
         }
       }
     }
+
+    if(socketProvider!.currentSession != null) {
+      socketProvider!.uxProvider.animateWelcomePage(2);
+    }
+
     socketProvider!.updateView();
   }
 
@@ -114,6 +119,13 @@ class SessionHandlers {
           break;
         case "pause":
           socketProvider!.pauseMovie();
+          break;
+        case "goToSessionSetting":
+          socketProvider!.uxProvider.animateWelcomePage(2);
+          socketProvider!.pauseMovie();
+          break;
+        case "goToPlayer":
+          socketProvider!.uxProvider.animateWelcomePage(3);
           break;
       }
     }

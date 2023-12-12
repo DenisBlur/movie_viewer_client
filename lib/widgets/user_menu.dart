@@ -23,13 +23,13 @@ class UserMenu extends StatelessWidget {
             top: 64 + 16,
             bottom: 94,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(16),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor.withOpacity(.8), borderRadius: BorderRadius.circular(8)),
-                  width: 200,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor.withOpacity(.8), borderRadius: BorderRadius.circular(16)),
+                  width: 350,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -53,8 +53,8 @@ class UserMenu extends StatelessWidget {
                         height: 8,
                       ),
                       SizedBox(
-                        height: MediaQuery.of(context).size.height - 230 - 16,
-                        width: 200,
+                        height: MediaQuery.of(context).size.height - 198-64,
+                        width: 350,
                         child: ListView.builder(
                             itemBuilder: (context, index) {
                               return UserItem(

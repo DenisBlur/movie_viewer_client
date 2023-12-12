@@ -4,6 +4,8 @@ import 'package:movie_viewer/model/socket/socket_provider.dart';
 import 'package:movie_viewer/widgets/dialogs.dart';
 import 'package:movie_viewer/widgets/items/update_item.dart';
 
+import '../big_button.dart';
+
 class TabMain extends StatelessWidget {
   const TabMain({super.key, required this.socketProvider});
 
@@ -110,38 +112,3 @@ class TabMain extends StatelessWidget {
   }
 }
 
-class BigButton extends StatelessWidget {
-  const BigButton({super.key, required this.onTap, required this.title, required this.icon, this.w = 250, this.h = 250});
-
-  final VoidCallback onTap;
-  final String title;
-  final IconData icon;
-
-  final double? w;
-  final double? h;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      focusNode: null,
-      borderRadius: BorderRadius.circular(16),
-      onTap: onTap,
-      child: Container(
-        width: w,
-        height: h,
-        decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer.withOpacity(.1), borderRadius: BorderRadius.circular(16)),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 36,
-            ),
-            Text(title)
-          ],
-        ),
-      ),
-    );
-  }
-}

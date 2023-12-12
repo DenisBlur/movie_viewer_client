@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:movie_viewer/model/hq_movie_provider.dart';
 import 'package:movie_viewer/model/sites/movie_provider.dart';
-import 'package:movie_viewer/widgets/items/movie_item.dart';
 import 'package:provider/provider.dart';
 
 import '../data/common.dart';
@@ -34,7 +32,7 @@ class _CustomMovieFinderState extends State<CustomMovieFinder> {
                 controller: textEditingController,
                 onSubmitted: (value) {
                   var movie = Movie(title: "Custom", coverUrl: "https://tvv.kinolord.click/uploads/posts/2023-11/temnye-vody.webp", imdb: "0", kp: "0", pageUrl: value,  year: "2077");
-                  mp.getMovieStreamLink(movie: movie, scroll: false);
+                  mp.getMovieStreamLink(movie: movie);
                 },
               ),
               if (mp.loading) const LinearProgressIndicator(),

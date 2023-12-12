@@ -11,6 +11,7 @@ class UxProvider extends ChangeNotifier {
   bool _showAdminPanel = false;
   bool _showControls = false;
   bool _showVolume = false;
+  bool isPlay = false;
   bool seek = false;
   bool _showButtonChangeFilm = false;
 
@@ -51,7 +52,6 @@ class UxProvider extends ChangeNotifier {
 
   void animateWelcomePage(int page) {
     pageController.animateToPage(page, duration: const Duration(milliseconds: 650), curve: Curves.fastEaseInToSlowEaseOut);
-    //showButtonChangeFilm = page == 2;
   }
 
   void controlsBase() {
@@ -60,7 +60,7 @@ class UxProvider extends ChangeNotifier {
     }
     if(!_showAdminPanel && !_showUserPanel) {
       _timer = Timer(const Duration(seconds: 1), () {
-        if(!showVolume && !seek) {
+        if(!showVolume && !seek && isPlay) {
           showControls = false;
         }
       });

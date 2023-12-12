@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:movie_viewer/data/common.dart';
 
-var movieCardW = 200.0;
+var movieCardW = 250.0;
 var movieCardH = 350.0;
 
 class MovieItem extends StatefulWidget {
@@ -20,6 +20,8 @@ class _MovieItemState extends State<MovieItem> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      splashColor: Colors.transparent,
       hoverColor: Colors.transparent,
       onTap: () async {
         widget.callback();
@@ -35,7 +37,7 @@ class _MovieItemState extends State<MovieItem> {
           children: [
             if(widget.movie.coverUrl != null)
             ClipRRect(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(16),
                 child: Image.network(
                   widget.movie.coverUrl!,
                   fit: BoxFit.cover,
@@ -43,12 +45,13 @@ class _MovieItemState extends State<MovieItem> {
                   height: movieCardH,
                 )),
             AnimatedContainer(
-              duration: const Duration(milliseconds: 650),
+              duration: const Duration(milliseconds: 350
+              ),
               curve: Curves.fastEaseInToSlowEaseOut,
               width: movieCardW,
               height: movieCardH,
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(16),
                   gradient: LinearGradient(
                       colors: [Colors.black.withOpacity(isHover ? .8 : .5), Colors.black.withOpacity(isHover ? .8 : 0)],
                       begin: Alignment.bottomCenter,

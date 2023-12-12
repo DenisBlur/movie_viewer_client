@@ -75,7 +75,7 @@ class MyApp extends StatelessWidget {
                 useMaterial3: true,
                 platform: TargetPlatform.iOS,
               ),
-              home: const MainScreen(),
+              home: const TestScreen(),
             );
           },
         );

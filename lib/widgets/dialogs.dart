@@ -128,7 +128,7 @@ Future<void> findMovie(BuildContext context) async {
               width: 16,
             ),
             Text(
-              "Имя",
+              "База фильмов",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ],

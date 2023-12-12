@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_hls_parser/flutter_hls_parser.dart';
 import 'package:movie_viewer/data/common.dart';
 import 'package:movie_viewer/data/save_data.dart';
 import 'package:movie_viewer/model/socket/session_handlers.dart';
@@ -11,6 +11,7 @@ import 'package:movie_viewer/model/socket/user_handlers.dart';
 import 'package:movie_viewer/model/ux_provider.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:http/http.dart' as http;
 
 class SocketProvider extends ChangeNotifier {
   ///Переменные
@@ -19,6 +20,8 @@ class SocketProvider extends ChangeNotifier {
   User? _currentUser;
   Session? _currentSession;
   List<Session>? _sessions;
+  List<Variant>? resolutionVariants;
+  Variant? currentVariant;
   UserHandlers? userHandlers;
   SessionHandlers? sessionHandlers;
   bool fullscreen = false;
@@ -42,13 +45,6 @@ class SocketProvider extends ChangeNotifier {
     if (value == null) {
       uxProvider.animateWelcomePage(0);
       notifyListeners();
-    } else {
-      if (value.currentMovie != null) {
-        uxProvider.animateWelcomePage(3);
-      } else {
-        uxProvider.animateWelcomePage(2);
-        notifyListeners();
-      }
     }
   }
 
@@ -73,7 +69,6 @@ class SocketProvider extends ChangeNotifier {
     player.positionStream.listen((event) {
       currentMSeconds = event.position!.inMilliseconds;
     });
-
 
     // ServicesBinding.instance.keyboard.addHandler((event) {
     //   final key = event.logicalKey.debugName;
@@ -101,9 +96,46 @@ class SocketProvider extends ChangeNotifier {
     connectToServer();
   }
 
+  changeResolution(int index) {
+    if (resolutionVariants != null) {
+      currentVariant = resolutionVariants![index];
+      player.open(Media.network(currentVariant!.url.toString()), autoStart: true);
+      sendSessionActionDuration(currentMSeconds);
+    }
+  }
+
   setMovie({required String video, String? audio}) async {
-    player.open(Media.network(video), autoStart: false);
-    if (audio != null) {
+    if (audio == null) {
+      var response = await http.get(Uri.parse(video));
+      try {
+        var playList = await HlsPlaylistParser.create().parseString(Uri.parse(video), response.body) as HlsMasterPlaylist;
+        resolutionVariants = playList.variants;
+        if (resolutionVariants != null) {
+          for (int i = 0; i < resolutionVariants!.length; i++) {
+            if (resolutionVariants![i].format.width == 1920) {
+              currentVariant = resolutionVariants![i];
+              break;
+            } else if (resolutionVariants![i].format.width != null) {
+              currentVariant = resolutionVariants![i];
+            }
+          }
+        }
+        if (currentVariant != null) {
+          player.open(Media.network(currentVariant!.url.toString()), autoStart: false);
+        }
+      } on ParserException catch (e) {
+        if (kDebugMode) {
+          print(e);
+        }
+      }
+    } else {
+      resolutionVariants = null;
+      currentVariant = null;
+
+      if (audioPlayer != null) {
+        audioPlayer!.dispose();
+      }
+      player.open(Media.network(video), autoStart: false);
       audioPlayer = Player(id: 13155, commandlineArguments: ['--no-video']);
       audioPlayer!.open(Media.network(audio), autoStart: false);
       player.positionStream.listen((event) {
@@ -118,36 +150,34 @@ class SocketProvider extends ChangeNotifier {
           }
         }
       });
-    } else {
-      if (audioPlayer != null) {
-        audioPlayer!.dispose();
-      }
     }
     notifyListeners();
   }
 
-  pauseMovie()  {
+  pauseMovie() {
     player.pause();
+    uxProvider.isPlay = false;
     if (audioPlayer != null) {
       audioPlayer!.pause();
     }
     notifyListeners();
   }
 
-  playMovie()  {
+  playMovie() {
     player.play();
+    uxProvider.isPlay = true;
     if (audioPlayer != null) {
       audioPlayer!.play();
     }
     notifyListeners();
   }
 
-  seekMovie(int value)  {
+  seekMovie(int value) {
     player.seek(Duration(milliseconds: value));
     notifyListeners();
   }
 
-  stopMovie()  {
+  stopMovie() {
     player.stop();
     if (audioPlayer != null) {
       audioPlayer!.stop();
@@ -178,8 +208,7 @@ class SocketProvider extends ChangeNotifier {
   }
 
   bool connectToServer({String? ip = "95.105.56.9", String? port = "3000"}) {
-
-    if(socket != null && socket!.connected) {
+    if (socket != null && socket!.connected) {
       socket!.dispose();
     }
 
@@ -278,7 +307,6 @@ class SocketProvider extends ChangeNotifier {
 
   ///Отправка позиции плеера
   sendSessionActionDuration(int ms) {
-
     currentMSeconds = ms;
 
     if (currentSession != null) {
@@ -298,7 +326,7 @@ class SocketProvider extends ChangeNotifier {
 
   ///Отправка данных плеера на сервер
   void sendPlayerTime() {
-    if (currentSession != null  && currentUser != null) {
+    if (currentSession != null && currentUser != null) {
       currentUser!.currentTime = currentMSeconds;
       var dataPack = {"user": currentUser!.toJson(), "sessionId": currentSession!.sessionId};
       socket!.emit("user_player_time", jsonEncode(dataPack));

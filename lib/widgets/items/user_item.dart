@@ -12,19 +12,19 @@ class UserItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(8),
+      width: 250,
+      padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer, borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer, borderRadius: BorderRadius.circular(16)),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             user.username!,
-            style: Theme.of(context).textTheme.labelMedium,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
-          Text(user.id!, style: Theme.of(context).textTheme.labelSmall),
-          Text(context.read<SocketProvider>().durationToHMS(Duration(milliseconds: user.currentTime!)),
+          Text("Время: ${context.read<SocketProvider>().durationToHMS(Duration(milliseconds: user.currentTime!))}",
               style: Theme.of(context).textTheme.labelSmall),
         ],
       ),
